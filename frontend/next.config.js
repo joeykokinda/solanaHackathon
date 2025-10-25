@@ -1,0 +1,7 @@
+module.exports = {
+  reactStrictMode: true,
+  images: {
+    domains: ['yt3.ggpht.com', 'yt3.googleusercontent.com'],
+  },
+}
+

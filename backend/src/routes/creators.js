@@ -3,6 +3,84 @@ const { PrismaClient } = require('@prisma/client');
 const router = express.Router();
 const prisma = new PrismaClient();
 
+const MOCK_CREATORS = [
+  {
+    id: 'mock-1',
+    channelName: 'TechStartup Daily',
+    channelAvatar: 'https://yt3.ggpht.com/ytc/AIdro_l7JGPKu6JRzE9qk-3qX6',
+    tokenAddress: '5Z7vK2mF6tH8nP4wN9bRxYqP3gLtE8dU7sC1wA6hF9pM',
+    subscribers: 8500,
+    avgViews: 25000,
+    engagementScore: 0.12,
+    uploadFrequency: 4.2,
+    priceSOL: 0.015,
+    priceChange24h: 5.2,
+    volume24h: 3.4,
+    marketCap: 127.5,
+    launchDate: new Date('2025-10-20')
+  },
+  {
+    id: 'mock-2',
+    channelName: 'Gaming Underdog',
+    channelAvatar: 'https://yt3.ggpht.com/ytc/AIdro_mBGHPLv7KS0FarRl',
+    tokenAddress: '8K9wL3nG7uI9oQ5xO0cSzZrQ4hMuF9eV8tD2xB7iG0qN',
+    subscribers: 2100,
+    avgViews: 8000,
+    engagementScore: 0.18,
+    uploadFrequency: 3.5,
+    priceSOL: 0.008,
+    priceChange24h: -2.1,
+    volume24h: 1.8,
+    marketCap: 16.8,
+    launchDate: new Date('2025-10-18')
+  },
+  {
+    id: 'mock-3',
+    channelName: 'Crypto Explained',
+    channelAvatar: 'https://yt3.ggpht.com/ytc/AIdro_nCHIQMw8LT1GbsS',
+    tokenAddress: '9L0xM4oH8vJ0pR6yP1dTaAsR5iNvG0fW9uE3yC8jH1rO',
+    subscribers: 12000,
+    avgViews: 45000,
+    engagementScore: 0.09,
+    uploadFrequency: 2.8,
+    priceSOL: 0.024,
+    priceChange24h: 12.8,
+    volume24h: 8.2,
+    marketCap: 288.0,
+    launchDate: new Date('2025-10-22')
+  },
+  {
+    id: 'mock-4',
+    channelName: 'Fitness Revolution',
+    channelAvatar: 'https://yt3.ggpht.com/ytc/AIdro_oDJKRNx9MU2HctT',
+    tokenAddress: '0M1yN5pH9wK1qS7zQ2eUbBtS6jOw H1gX0vF4zD9kI2sP',
+    subscribers: 5400,
+    avgViews: 18000,
+    engagementScore: 0.15,
+    uploadFrequency: 5.0,
+    priceSOL: 0.011,
+    priceChange24h: 3.4,
+    volume24h: 2.1,
+    marketCap: 59.4,
+    launchDate: new Date('2025-10-19')
+  },
+  {
+    id: 'mock-5',
+    channelName: 'Indie Music Hub',
+    channelAvatar: 'https://yt3.ggpht.com/ytc/AIdro_pEKLSOy0NV3IduU',
+    tokenAddress: '1N2zO6qI0xL2rT8aR3fVcCuT7kPxI2hY1wG5aE0lJ3tQ',
+    subscribers: 3200,
+    avgViews: 12000,
+    engagementScore: 0.21,
+    uploadFrequency: 3.1,
+    priceSOL: 0.007,
+    priceChange24h: 8.9,
+    volume24h: 1.2,
+    marketCap: 22.4,
+    launchDate: new Date('2025-10-21')
+  }
+];
+
 router.get('/', async (req, res) => {
   try {
     const { limit = 20, offset = 0, sortBy = 'launchDate' } = req.query;
@@ -20,7 +98,7 @@ router.get('/', async (req, res) => {
       orderBy: { launchDate: 'desc' }
     });
 
-    const creatorsWithMetrics = creators.map(creator => {
+    let creatorsWithMetrics = creators.map(creator => {
       const latestMetrics = creator.metricsHistory[0] || {};
       return {
         id: creator.id,
@@ -31,11 +109,19 @@ router.get('/', async (req, res) => {
         avgViews: latestMetrics.avgViews || creator.initialAvgViews,
         engagementScore: latestMetrics.engagementRate || 0,
         uploadFrequency: latestMetrics.uploadFrequency || 0,
+        priceSOL: 0.01 + Math.random() * 0.02,
+        priceChange24h: (Math.random() - 0.5) * 20,
+        volume24h: Math.random() * 10,
+        marketCap: (latestMetrics.subscribers || creator.initialSubscribers) * 0.01,
         launchDate: creator.launchDate
       };
     });
 
-    const total = await prisma.creator.count({ where: { status: 'active' } });
+    if (creatorsWithMetrics.length === 0) {
+      creatorsWithMetrics = MOCK_CREATORS;
+    }
+
+    const total = creatorsWithMetrics.length;
 
     res.json({
       creators: creatorsWithMetrics,
