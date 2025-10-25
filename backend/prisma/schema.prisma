@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  wallet    String   @unique
+  createdAt DateTime @default(now())
+  Creator   Creator?
+}
+
+model Creator {
+  id                  String           @id @default(uuid())
+  userId              String           @unique
+  user                User             @relation(fields: [userId], references: [id])
+  youtubeChannelId    String           @unique
+  channelName         String
+  channelAvatar       String?
+  tokenAddress        String           @unique
+  initialSubscribers  Int
+  initialAvgViews     Int
+  launchDate          DateTime         @default(now())
+  status              String           @default("active")
+  metricsHistory      MetricsHistory[]
+}
+
+model MetricsHistory {
+  id              String   @id @default(uuid())
+  creatorId       String
+  creator         Creator  @relation(fields: [creatorId], references: [id])
+  subscribers     Int
+  totalViews      BigInt
+  videoCount      Int
+  avgViews        Int
+  engagementRate  Float
+  uploadFrequency Float
+  timestamp       DateTime @default(now())
+
+  @@index([creatorId, timestamp])
+}
+
+model Transaction {
+  id            String   @id @default(uuid())
+  tokenAddress  String
+  buyerWallet   String
+  txSignature   String   @unique
+  type          String
+  tokenAmount   BigInt
+  solAmount     BigInt
+  pricePerToken Float
+  timestamp     DateTime @default(now())
+
+  @@index([tokenAddress, timestamp])
+  @@index([buyerWallet, timestamp])
+}
+

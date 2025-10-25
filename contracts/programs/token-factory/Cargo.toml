@@ -1,0 +1,22 @@
+[package]
+name = "token-factory"
+version = "0.1.0"
+description = "YouVest Token Factory"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "token_factory"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
+
+[dependencies]
+anchor-lang = "0.32.1"
+anchor-spl = "0.32.1"
+
