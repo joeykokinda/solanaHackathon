@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { DollarSign, TrendingUp, Percent, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { MOCK_CREATORS } from '@/lib/mockData';
@@ -39,14 +41,38 @@ const MOCK_TRANSACTIONS = [
 ];
 
 export default function Portfolio() {
+  const { connected } = useWallet();
   const totalValue = MOCK_HOLDINGS.reduce((sum, h) => sum + h.value, 0);
   const totalInvested = MOCK_HOLDINGS.reduce((sum, h) => sum + h.invested, 0);
   const totalPnL = totalValue - totalInvested;
   const totalReturn = (totalPnL / totalInvested) * 100;
 
+  if (!connected) {
+    return (
+      <div style={{ 
+        maxWidth: '600px', 
+        margin: '6rem auto', 
+        padding: '3rem 2rem',
+        textAlign: 'center'
+      }}>
+        <div className="card-no-hover" style={{ padding: '3rem 2rem' }}>
+          <h1 style={{ marginBottom: '1rem', fontSize: '2rem' }}>Connect Your Wallet</h1>
+          <p style={{ color: 'var(--gray)', marginBottom: '2rem', fontSize: '1rem' }}>
+            Connect your wallet to view your portfolio and manage your holdings.
+          </p>
+          <WalletMultiButton style={{
+            margin: '0 auto',
+            fontSize: '1rem',
+            padding: '0.875rem 2rem'
+          }} />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '2rem 1rem' }}>
-      <h1 style={{ marginBottom: '2rem', fontSize: '2rem' }}>Your Portfolio</h1>
+    <div className="p-8">
+      <h1 className="text-4xl font-bold text-white mb-8">Portfolio</h1>
 
       <div style={{ 
         display: 'grid', 
@@ -115,7 +141,7 @@ export default function Portfolio() {
               {MOCK_HOLDINGS.map((holding, i) => (
                 <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
                   <td style={{ padding: '1rem 1.5rem' }}>
-                    <Link href={`/creator/${holding.creator.id}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}>
+                    <Link href={`/app/creator/${holding.creator.id}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}>
                       <img 
                         src={holding.creator.channelAvatar}
                         alt=""
@@ -144,7 +170,7 @@ export default function Portfolio() {
                     </div>
                   </td>
                   <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
-                    <Link href={`/creator/${holding.creator.id}`}>
+                    <Link href={`/app/creator/${holding.creator.id}`}>
                       <button className="btn" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}>
                         Trade
                       </button>

@@ -1,170 +1,186 @@
 'use client';
 
-import { useState } from 'react';
-import CreatorCard from '@/components/CreatorCard';
-import SkeletonCard from '@/components/SkeletonCard';
-import { MOCK_CREATORS } from '@/lib/mockData';
-import { Search } from 'lucide-react';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import PublicNav from '@/components/PublicNav';
 import Aurora from '@/components/ui/Aurora';
+import { MOCK_CREATORS } from '@/lib/mockData';
+import CreatorCard from '@/components/CreatorCard';
 
-export default function Markets() {
-  const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterValue, setFilterValue] = useState('all');
-  const [sortValue, setSortValue] = useState('trending');
+export default function LandingPage() {
+  const { connected } = useWallet();
+  const router = useRouter();
+  const featuredCreators = MOCK_CREATORS.slice(0, 3);
 
-  const filteredCreators = MOCK_CREATORS.filter(creator => 
-    creator.channelName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const featuredCreators = MOCK_CREATORS.slice(0, 5);
+  useEffect(() => {
+    if (connected) {
+      router.push('/app');
+    }
+  }, [connected, router]);
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh' }}>
-      <Aurora 
-        colorStops={['#0a0a0a', '#1a1a1a', '#0a0a0a']}
-        amplitude={0.6}
-        blend={0.3}
-        speed={0.2}
-      />
-      <div style={{ position: 'relative', zIndex: 1, maxWidth: '1400px', margin: '0 auto', padding: '2rem 1rem' }}>
-      <div style={{ 
-        display: 'flex', 
-        gap: '1rem',
-        marginBottom: '2rem',
-        flexWrap: 'wrap'
-      }}>
-        <div style={{ flex: '1', minWidth: '300px', position: 'relative' }}>
-          <Search 
-            size={18} 
-            style={{ 
-              position: 'absolute', 
-              left: '1rem', 
-              top: '50%', 
-              transform: 'translateY(-50%)',
-              color: 'var(--gray)'
-            }} 
-          />
-          <input
-            type="text"
-            placeholder="Search creators..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="input"
-            style={{ paddingLeft: '2.75rem', height: '42px' }}
-          />
-        </div>
-
-        <select 
-          value={filterValue}
-          onChange={(e) => setFilterValue(e.target.value)}
-          style={{ 
-            width: '180px',
-            height: '42px',
-            padding: '0 1rem',
-            backgroundColor: 'var(--black-card)',
-            border: '1px solid var(--border)',
-            borderRadius: '0.5rem',
-            color: 'var(--white)',
-            fontSize: '0.875rem',
-            cursor: 'pointer'
-          }}
-        >
-          <option value="all">All Creators</option>
-          <option value="under5k">Under 5k</option>
-          <option value="5k-10k">5k-10k</option>
-          <option value="over10k">Over 10k</option>
-        </select>
-
-        <select 
-          value={sortValue}
-          onChange={(e) => setSortValue(e.target.value)}
-          style={{ 
-            width: '180px',
-            height: '42px',
-            padding: '0 1rem',
-            backgroundColor: 'var(--black-card)',
-            border: '1px solid var(--border)',
-            borderRadius: '0.5rem',
-            color: 'var(--white)',
-            fontSize: '0.875rem',
-            cursor: 'pointer'
-          }}
-        >
-          <option value="trending">Trending</option>
-          <option value="new">Newest</option>
-          <option value="volume">Volume</option>
-          <option value="price">Price</option>
-        </select>
-      </div>
-
-      {featuredCreators.length > 0 && (
-        <div style={{ marginBottom: '3rem' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1rem' }}>
-            Featured
-          </h2>
-          <div style={{
-            display: 'flex',
-            gap: '1rem',
-            overflowX: 'auto',
-            paddingBottom: '1rem',
-            scrollSnapType: 'x mandatory',
-            msOverflowStyle: 'none',
-            scrollbarWidth: 'none'
+    <>
+      <PublicNav />
+      <div style={{ position: 'relative', minHeight: '100vh' }}>
+        <Aurora 
+          colorStops={['#0a0a0a', '#1a1a1a', '#0a0a0a']}
+          amplitude={0.6}
+          blend={0.3}
+          speed={0.2}
+        />
+        
+        <div style={{ position: 'relative', zIndex: 1, paddingTop: '120px' }}>
+          <section style={{ 
+            maxWidth: '1200px', 
+            margin: '0 auto', 
+            padding: '4rem 2rem',
+            textAlign: 'center'
           }}>
-            {featuredCreators.map((creator) => (
-              <div key={creator.id} style={{ 
-                minWidth: '280px',
-                scrollSnapAlign: 'start'
-              }}>
-                <CreatorCard creator={creator} />
+            <h1 style={{ 
+              fontSize: '4rem', 
+              fontWeight: 700, 
+              marginBottom: '1.5rem',
+              lineHeight: 1.1
+            }}>
+              Invest in Creators<br />Before They Blow Up
+            </h1>
+            
+            <p style={{ 
+              fontSize: '1.25rem', 
+              color: 'var(--gray-light)', 
+              marginBottom: '3rem',
+              maxWidth: '600px',
+              margin: '0 auto 3rem'
+            }}>
+              Buy tokens of YouTubers with 1k-50k subs. Profit as they grow.
+            </p>
+
+            <div style={{ 
+              display: 'flex', 
+              gap: '1rem', 
+              justifyContent: 'center',
+              flexWrap: 'wrap'
+            }}>
+              <a href="/app" className="btn-primary">
+                Explore Creators
+              </a>
+              <a href="/app" className="btn">
+                Launch App
+              </a>
+            </div>
+          </section>
+
+          <section style={{ 
+            maxWidth: '1000px', 
+            margin: '6rem auto', 
+            padding: '0 2rem',
+            textAlign: 'center'
+          }}>
+            <h2 style={{ fontSize: '2.5rem', marginBottom: '3rem' }}>
+              How It Works
+            </h2>
+            
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gap: '2rem'
+            }}>
+              <div className="card-no-hover" style={{ padding: '2rem' }}>
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔍</div>
+                <h3 style={{ marginBottom: '0.75rem' }}>Discover</h3>
+                <p style={{ color: 'var(--gray)' }}>
+                  Find early-stage YouTubers with 1k-50k subscribers
+                </p>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
 
-      <div style={{ marginBottom: '1rem' }}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>
-          All Creators
-        </h2>
-        <p style={{ color: 'var(--gray)', fontSize: '0.875rem' }}>
-          {filteredCreators.length} creators
-        </p>
-      </div>
+              <div className="card-no-hover" style={{ padding: '2rem' }}>
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>💰</div>
+                <h3 style={{ marginBottom: '0.75rem' }}>Invest</h3>
+                <p style={{ color: 'var(--gray)' }}>
+                  Buy creator tokens on the bonding curve
+                </p>
+              </div>
 
-      {loading ? (
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-          gap: '1.25rem'
-        }}>
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <SkeletonCard key={i} />
-          ))}
+              <div className="card-no-hover" style={{ padding: '2rem' }}>
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📈</div>
+                <h3 style={{ marginBottom: '0.75rem' }}>Profit</h3>
+                <p style={{ color: 'var(--gray)' }}>
+                  Token value grows as the creator gains subscribers
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section style={{ 
+            maxWidth: '1200px', 
+            margin: '6rem auto', 
+            padding: '0 2rem'
+          }}>
+            <h2 style={{ fontSize: '2rem', marginBottom: '2rem', textAlign: 'center' }}>
+              Featured Creators
+            </h2>
+            
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+              gap: '1.5rem',
+              marginBottom: '3rem'
+            }}>
+              {featuredCreators.map((creator) => (
+                <CreatorCard key={creator.id} creator={creator} />
+              ))}
+            </div>
+
+            <div style={{ textAlign: 'center' }}>
+              <a href="/app" className="btn">
+                View All Creators →
+              </a>
+            </div>
+          </section>
+
+          <section style={{ 
+            maxWidth: '1000px', 
+            margin: '6rem auto', 
+            padding: '4rem 2rem',
+            textAlign: 'center'
+          }}>
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-around',
+              gap: '3rem',
+              marginBottom: '4rem',
+              flexWrap: 'wrap'
+            }}>
+              <div>
+                <div style={{ fontSize: '3rem', fontWeight: 700, marginBottom: '0.5rem' }}>
+                  127
+                </div>
+                <div style={{ color: 'var(--gray)' }}>Creators</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '3rem', fontWeight: 700, marginBottom: '0.5rem' }}>
+                  $45k
+                </div>
+                <div style={{ color: 'var(--gray)' }}>Volume</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '3rem', fontWeight: 700, marginBottom: '0.5rem' }}>
+                  2,341
+                </div>
+                <div style={{ color: 'var(--gray)' }}>Investors</div>
+              </div>
+            </div>
+
+            <h2 style={{ fontSize: '2.5rem', marginBottom: '1.5rem' }}>
+              Ready to get started?
+            </h2>
+            <a href="/app" className="btn-primary" style={{ fontSize: '1.125rem' }}>
+              Launch App
+            </a>
+          </section>
         </div>
-      ) : filteredCreators.length === 0 ? (
-        <div className="card-no-hover" style={{ padding: '4rem 2rem', textAlign: 'center' }}>
-          <h3 style={{ marginBottom: '0.5rem', fontWeight: 500 }}>No creators found</h3>
-          <p style={{ color: 'var(--gray)', marginBottom: '1.5rem' }}>
-            Try adjusting your search or filters
-          </p>
-          <button className="btn" onClick={() => setSearchQuery('')}>
-            Clear Search
-          </button>
-        </div>
-      ) : (
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-          gap: '1.25rem'
-        }}>
-          {filteredCreators.map((creator) => (
-            <CreatorCard key={creator.id} creator={creator} />
-          ))}
-        </div>
-      )}
       </div>
-    </div>
+    </>
   );
 }

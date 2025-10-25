@@ -25,7 +25,7 @@ export default function CreatorCard({ creator }: CreatorCardProps) {
   
   return (
     <Link 
-      href={`/creator/${creator.id}`}
+      href={`/app/creator/${creator.id}`}
       style={{ textDecoration: 'none', color: 'inherit' }}
     >
       <div className="card" style={{ padding: 0, overflow: 'hidden', cursor: 'pointer' }}>
