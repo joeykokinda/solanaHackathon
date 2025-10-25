@@ -5,6 +5,7 @@ import CreatorCard from '@/components/CreatorCard';
 import SkeletonCard from '@/components/SkeletonCard';
 import { MOCK_CREATORS } from '@/lib/mockData';
 import { Search } from 'lucide-react';
+import Aurora from '@/components/ui/Aurora';
 
 export default function Markets() {
   const [loading, setLoading] = useState(false);
@@ -19,7 +20,14 @@ export default function Markets() {
   const featuredCreators = MOCK_CREATORS.slice(0, 5);
 
   return (
-    <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '2rem 1rem' }}>
+    <div style={{ position: 'relative', minHeight: '100vh' }}>
+      <Aurora 
+        colorStops={['#0a0a0a', '#1a1a1a', '#0a0a0a']}
+        amplitude={0.6}
+        blend={0.3}
+        speed={0.2}
+      />
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: '1400px', margin: '0 auto', padding: '2rem 1rem' }}>
       <div style={{ 
         display: 'flex', 
         gap: '1rem',
@@ -156,6 +164,7 @@ export default function Markets() {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }
