@@ -18,54 +18,54 @@ export default function Footer() {
           marginBottom: '3rem'
         }}>
           <div>
-            <h4 style={{ fontWeight: 600, marginBottom: '1rem', color: 'var(--text-primary)' }}>
+            <h4 style={{ fontWeight: 600, marginBottom: '1rem', color: 'var(--white)' }}>
               YouVest
             </h4>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: 1.6 }}>
+            <p style={{ color: 'var(--gray)', fontSize: '0.875rem', lineHeight: 1.6 }}>
               Invest in creators before they blow up
             </p>
           </div>
 
           <div>
-            <h4 style={{ fontWeight: 600, marginBottom: '1rem', color: 'var(--text-primary)' }}>
+            <h4 style={{ fontWeight: 600, marginBottom: '1rem', color: 'var(--white)' }}>
               Product
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <Link href="/marketplace" style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+              <Link href="/marketplace" style={{ color: 'var(--gray)', fontSize: '0.875rem' }}>
                 Marketplace
               </Link>
-              <Link href="/how-it-works" style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+              <Link href="/how-it-works" style={{ color: 'var(--gray)', fontSize: '0.875rem' }}>
                 How It Works
               </Link>
-              <Link href="/launch" style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+              <Link href="/launch" style={{ color: 'var(--gray)', fontSize: '0.875rem' }}>
                 Launch Token
               </Link>
             </div>
           </div>
 
           <div>
-            <h4 style={{ fontWeight: 600, marginBottom: '1rem', color: 'var(--text-primary)' }}>
+            <h4 style={{ fontWeight: 600, marginBottom: '1rem', color: 'var(--white)' }}>
               Company
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <a href="#" style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>About</a>
-              <a href="#" style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Blog</a>
-              <a href="#" style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Docs</a>
+              <a href="#" style={{ color: 'var(--gray)', fontSize: '0.875rem' }}>About</a>
+              <a href="#" style={{ color: 'var(--gray)', fontSize: '0.875rem' }}>Blog</a>
+              <a href="#" style={{ color: 'var(--gray)', fontSize: '0.875rem' }}>Docs</a>
             </div>
           </div>
 
           <div>
-            <h4 style={{ fontWeight: 600, marginBottom: '1rem', color: 'var(--text-primary)' }}>
+            <h4 style={{ fontWeight: 600, marginBottom: '1rem', color: 'var(--white)' }}>
               Social
             </h4>
             <div style={{ display: 'flex', gap: '1rem' }}>
-              <a href="#" style={{ color: 'var(--text-secondary)' }}>
+              <a href="#" style={{ color: 'var(--gray)' }}>
                 <Twitter size={20} />
               </a>
-              <a href="#" style={{ color: 'var(--text-secondary)' }}>
+              <a href="#" style={{ color: 'var(--gray)' }}>
                 <MessageCircle size={20} />
               </a>
-              <a href="#" style={{ color: 'var(--text-secondary)' }}>
+              <a href="#" style={{ color: 'var(--gray)' }}>
                 <Github size={20} />
               </a>
             </div>
@@ -76,7 +76,7 @@ export default function Footer() {
           paddingTop: '2rem', 
           borderTop: '1px solid var(--border)',
           textAlign: 'center',
-          color: 'var(--text-tertiary)',
+          color: 'var(--gray)',
           fontSize: '0.875rem'
         }}>
           © 2025 YouVest. Built on Solana.
@@ -85,4 +85,3 @@ export default function Footer() {
     </footer>
   );
 }
-

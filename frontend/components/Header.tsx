@@ -17,69 +17,62 @@ export default function Header() {
       alignItems: 'center',
       position: 'sticky',
       top: 0,
-      backgroundColor: 'rgba(10, 14, 39, 0.8)',
-      backdropFilter: 'blur(12px)',
+      backgroundColor: 'var(--black)',
       zIndex: 50
     }}>
       <div style={{ display: 'flex', gap: '3rem', alignItems: 'center', flex: 1 }}>
         <Link href="/" style={{ 
           fontSize: '1.5rem', 
-          fontWeight: 700,
+          fontWeight: 600,
           textDecoration: 'none',
-          color: '#ffffff',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem'
+          color: 'var(--white)',
+          letterSpacing: '-0.01em'
         }}>
-          <span style={{ 
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            width: '32px',
-            height: '32px',
-            borderRadius: '8px',
-            display: 'inline-block'
-          }} />
           YouVest
         </Link>
         
         <nav style={{ 
           display: 'flex', 
           gap: '2rem',
-          '@media (max-width: 768px)': { display: 'none' }
         }} className="hidden md:flex">
           <Link href="/marketplace" style={{
             textDecoration: 'none',
-            color: 'var(--text-secondary)',
+            color: 'var(--gray)',
             fontWeight: 500,
-            transition: 'color 0.2s'
-          }} onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
-             onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}>
+            transition: 'color 0.2s',
+            fontSize: '0.9375rem'
+          }} onMouseEnter={(e) => e.currentTarget.style.color = 'var(--white)'}
+             onMouseLeave={(e) => e.currentTarget.style.color = 'var(--gray)'}>
             Marketplace
           </Link>
           <Link href="/how-it-works" style={{
             textDecoration: 'none',
-            color: 'var(--text-secondary)',
+            color: 'var(--gray)',
             fontWeight: 500,
-            transition: 'color 0.2s'
-          }} onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
-             onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}>
+            transition: 'color 0.2s',
+            fontSize: '0.9375rem'
+          }} onMouseEnter={(e) => e.currentTarget.style.color = 'var(--white)'}
+             onMouseLeave={(e) => e.currentTarget.style.color = 'var(--gray)'}>
             How It Works
           </Link>
           <Link href="/launch" style={{
             textDecoration: 'none',
-            color: 'var(--text-secondary)',
+            color: 'var(--gray)',
             fontWeight: 500,
-            transition: 'color 0.2s'
-          }} onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
-             onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}>
+            transition: 'color 0.2s',
+            fontSize: '0.9375rem'
+          }} onMouseEnter={(e) => e.currentTarget.style.color = 'var(--white)'}
+             onMouseLeave={(e) => e.currentTarget.style.color = 'var(--gray)'}>
             Launch Token
           </Link>
           <Link href="/portfolio" style={{
             textDecoration: 'none',
-            color: 'var(--text-secondary)',
+            color: 'var(--gray)',
             fontWeight: 500,
-            transition: 'color 0.2s'
-          }} onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
-             onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}>
+            transition: 'color 0.2s',
+            fontSize: '0.9375rem'
+          }} onMouseEnter={(e) => e.currentTarget.style.color = 'var(--white)'}
+             onMouseLeave={(e) => e.currentTarget.style.color = 'var(--gray)'}>
             Portfolio
           </Link>
         </nav>
@@ -90,7 +83,7 @@ export default function Header() {
         <button 
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           className="md:hidden"
-          style={{ color: 'var(--text-primary)', background: 'none', border: 'none', cursor: 'pointer' }}
+          style={{ color: 'var(--white)', background: 'none', border: 'none', cursor: 'pointer' }}
         >
           {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -102,17 +95,17 @@ export default function Header() {
           top: '100%',
           left: 0,
           right: 0,
-          backgroundColor: 'var(--surface)',
+          backgroundColor: 'var(--black-card)',
           borderBottom: '1px solid var(--border)',
           padding: '1rem',
           display: 'flex',
           flexDirection: 'column',
           gap: '1rem'
         }} className="md:hidden">
-          <Link href="/marketplace" style={{ color: 'var(--text-secondary)', padding: '0.5rem' }}>Marketplace</Link>
-          <Link href="/how-it-works" style={{ color: 'var(--text-secondary)', padding: '0.5rem' }}>How It Works</Link>
-          <Link href="/launch" style={{ color: 'var(--text-secondary)', padding: '0.5rem' }}>Launch Token</Link>
-          <Link href="/portfolio" style={{ color: 'var(--text-secondary)', padding: '0.5rem' }}>Portfolio</Link>
+          <Link href="/marketplace" style={{ color: 'var(--gray)', padding: '0.5rem' }}>Marketplace</Link>
+          <Link href="/how-it-works" style={{ color: 'var(--gray)', padding: '0.5rem' }}>How It Works</Link>
+          <Link href="/launch" style={{ color: 'var(--gray)', padding: '0.5rem' }}>Launch Token</Link>
+          <Link href="/portfolio" style={{ color: 'var(--gray)', padding: '0.5rem' }}>Portfolio</Link>
         </div>
       )}
     </header>
