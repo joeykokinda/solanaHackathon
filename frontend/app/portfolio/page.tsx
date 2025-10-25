@@ -33,9 +33,9 @@ const MOCK_HOLDINGS = [
 ];
 
 const MOCK_TRANSACTIONS = [
-  { date: 'Oct 24, 2025', time: '2:30 PM', type: 'buy', creator: 'TechStartup Daily', amount: 50, sol: 0.75, status: 'confirmed', signature: '5Z7vK2mF6tH8...' },
-  { date: 'Oct 23, 2025', time: '4:15 PM', type: 'sell', creator: 'Gaming Underdog', amount: 30, sol: 0.24, status: 'confirmed', signature: '8K9wL3nG7uI9...' },
-  { date: 'Oct 22, 2025', time: '11:20 AM', type: 'buy', creator: 'Crypto Explained', amount: 100, sol: 2.40, status: 'confirmed', signature: '9L0xM4oH8vJ0...' },
+  { date: 'Oct 24, 2025', time: '2:30 PM', type: 'buy', creator: 'TechStartup Daily', amount: 50, sol: 0.75, signature: '5Z7vK2mF6tH8...' },
+  { date: 'Oct 23, 2025', time: '4:15 PM', type: 'sell', creator: 'Gaming Underdog', amount: 30, sol: 0.24, signature: '8K9wL3nG7uI9...' },
+  { date: 'Oct 22, 2025', time: '11:20 AM', type: 'buy', creator: 'Crypto Explained', amount: 100, sol: 2.40, signature: '9L0xM4oH8vJ0...' },
 ];
 
 export default function Portfolio() {
@@ -45,71 +45,68 @@ export default function Portfolio() {
   const totalReturn = (totalPnL / totalInvested) * 100;
 
   return (
-    <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '2.5rem 1.5rem' }}>
-      <h1 style={{ marginBottom: '2rem' }}>Your Portfolio</h1>
+    <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '2rem 1rem' }}>
+      <h1 style={{ marginBottom: '2rem', fontSize: '2rem' }}>Your Portfolio</h1>
 
       <div style={{ 
         display: 'grid', 
         gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-        gap: '1.5rem',
-        marginBottom: '3rem'
+        gap: '1rem',
+        marginBottom: '2.5rem'
       }}>
         <div className="card-no-hover" style={{ padding: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-            <DollarSign size={20} style={{ color: 'var(--primary)' }} />
-            <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Portfolio Value</span>
+          <div style={{ fontSize: '0.875rem', color: 'var(--gray)', marginBottom: '0.5rem' }}>
+            Portfolio Value
           </div>
-          <p style={{ fontSize: '2rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+          <p style={{ fontSize: '2rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
             ${totalValue.toFixed(2)}
           </p>
         </div>
 
         <div className="card-no-hover" style={{ padding: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-            <TrendingUp size={20} style={{ color: 'var(--primary)' }} />
-            <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Total Invested</span>
+          <div style={{ fontSize: '0.875rem', color: 'var(--gray)', marginBottom: '0.5rem' }}>
+            Total Invested
           </div>
-          <p style={{ fontSize: '2rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+          <p style={{ fontSize: '2rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
             ${totalInvested.toFixed(2)}
           </p>
         </div>
 
         <div className="card-no-hover" style={{ padding: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-            <Percent size={20} style={{ color: 'var(--success)' }} />
-            <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Total Returns</span>
+          <div style={{ fontSize: '0.875rem', color: 'var(--gray)', marginBottom: '0.5rem' }}>
+            Total Returns
           </div>
-          <p style={{ fontSize: '2rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums', color: 'var(--success)' }}>
+          <p style={{ fontSize: '2rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums', color: 'var(--green)' }}>
             +{totalReturn.toFixed(1)}%
           </p>
-          <p style={{ fontSize: '0.875rem', color: 'var(--success)' }}>
+          <p style={{ fontSize: '0.875rem', color: 'var(--green)' }}>
             +${totalPnL.toFixed(2)}
           </p>
         </div>
       </div>
 
-      <div className="card-no-hover" style={{ padding: 0, overflow: 'hidden', marginBottom: '2rem' }}>
+      <div className="card-no-hover" style={{ marginBottom: '2rem', overflow: 'hidden' }}>
         <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border)' }}>
-          <h2 style={{ fontSize: '1.25rem' }}>Your Holdings</h2>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Holdings</h2>
         </div>
         
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
                   Creator
                 </th>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'right', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'right', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
                   Amount
                 </th>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'right', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'right', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
                   Value
                 </th>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'right', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'right', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
                   P&L
                 </th>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'right', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'right', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
                   Actions
                 </th>
               </tr>
@@ -122,33 +119,33 @@ export default function Portfolio() {
                       <img 
                         src={holding.creator.channelAvatar}
                         alt=""
-                        style={{ width: '40px', height: '40px', borderRadius: '50%' }}
+                        style={{ width: '32px', height: '32px', borderRadius: '50%' }}
                       />
                       <div>
-                        <div style={{ fontWeight: 600 }}>{holding.creator.channelName}</div>
-                        <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                        <div style={{ fontWeight: 500, fontSize: '0.9375rem' }}>{holding.creator.channelName}</div>
+                        <div style={{ fontSize: '0.8125rem', color: 'var(--gray)' }}>
                           {holding.creator.subscribers.toLocaleString()} subs
                         </div>
                       </div>
                     </Link>
                   </td>
-                  <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
+                  <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontSize: '0.9375rem' }}>
                     {holding.amount}
                   </td>
-                  <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
+                  <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: 500, fontVariantNumeric: 'tabular-nums', fontSize: '0.9375rem' }}>
                     ${holding.value.toFixed(2)}
                   </td>
                   <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
-                    <div style={{ color: holding.pnl >= 0 ? 'var(--success)' : 'var(--danger)', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
+                    <div style={{ color: holding.pnl >= 0 ? 'var(--green)' : 'var(--red)', fontWeight: 500, fontVariantNumeric: 'tabular-nums', fontSize: '0.9375rem' }}>
                       +${holding.pnl.toFixed(2)}
                     </div>
-                    <div style={{ fontSize: '0.875rem', color: holding.pnl >= 0 ? 'var(--success)' : 'var(--danger)' }}>
+                    <div style={{ fontSize: '0.8125rem', color: holding.pnl >= 0 ? 'var(--green)' : 'var(--red)' }}>
                       +{holding.pnlPercent.toFixed(1)}%
                     </div>
                   </td>
                   <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
                     <Link href={`/creator/${holding.creator.id}`}>
-                      <button className="btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}>
+                      <button className="btn" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}>
                         Trade
                       </button>
                     </Link>
@@ -160,60 +157,60 @@ export default function Portfolio() {
         </div>
       </div>
 
-      <div className="card-no-hover" style={{ padding: 0, overflow: 'hidden' }}>
+      <div className="card-no-hover" style={{ overflow: 'hidden' }}>
         <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border)' }}>
-          <h2 style={{ fontSize: '1.25rem' }}>Transaction History</h2>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Recent Transactions</h2>
         </div>
         
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
                   Date
                 </th>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
                   Type
                 </th>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
                   Creator
                 </th>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'right', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'right', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
                   Amount
                 </th>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'right', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'right', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
                   SOL
                 </th>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'center', fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
-                  Status
+                <th style={{ padding: '1rem 1.5rem', textAlign: 'center', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
+                  View
                 </th>
               </tr>
             </thead>
             <tbody>
               {MOCK_TRANSACTIONS.map((tx, i) => (
                 <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
-                  <td style={{ padding: '1rem 1.5rem' }}>
+                  <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem' }}>
                     <div>{tx.date}</div>
-                    <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{tx.time}</div>
+                    <div style={{ color: 'var(--gray)', fontSize: '0.8125rem' }}>{tx.time}</div>
                   </td>
                   <td style={{ padding: '1rem 1.5rem' }}>
                     <span style={{
                       display: 'inline-block',
-                      padding: '0.25rem 0.75rem',
+                      padding: '0.25rem 0.625rem',
                       borderRadius: '0.25rem',
-                      fontSize: '0.875rem',
-                      fontWeight: 600,
-                      background: tx.type === 'buy' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                      color: tx.type === 'buy' ? 'var(--success)' : 'var(--danger)'
+                      fontSize: '0.8125rem',
+                      fontWeight: 500,
+                      border: `1px solid ${tx.type === 'buy' ? 'var(--green)' : 'var(--red)'}`,
+                      color: tx.type === 'buy' ? 'var(--green)' : 'var(--red)'
                     }}>
                       {tx.type.toUpperCase()}
                     </span>
                   </td>
-                  <td style={{ padding: '1rem 1.5rem' }}>{tx.creator}</td>
-                  <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
+                  <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem' }}>{tx.creator}</td>
+                  <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontSize: '0.875rem' }}>
                     {tx.amount} tokens
                   </td>
-                  <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
+                  <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: 500, fontVariantNumeric: 'tabular-nums', fontSize: '0.875rem' }}>
                     {tx.sol.toFixed(2)} SOL
                   </td>
                   <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>
@@ -221,9 +218,9 @@ export default function Portfolio() {
                       href={`https://explorer.solana.com/tx/${tx.signature}?cluster=devnet`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: 'var(--primary)' }}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: 'var(--gray)', fontSize: '0.875rem' }}
                     >
-                      View <ExternalLink size={14} />
+                      <ExternalLink size={14} />
                     </a>
                   </td>
                 </tr>
@@ -235,4 +232,3 @@ export default function Portfolio() {
     </div>
   );
 }
-

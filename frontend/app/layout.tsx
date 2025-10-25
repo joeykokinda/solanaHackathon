@@ -8,7 +8,7 @@ import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { clusterApiUrl } from '@solana/web3.js';
 import { useMemo } from 'react';
-import Header from '@/components/Header';
+import Navbar from '@/components/Navbar';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const network = WalletAdapterNetwork.Devnet;
@@ -28,14 +28,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-        <title>YouVest - Invest in Creators Before They Blow Up</title>
+        <title>YouVest - Invest in Creators</title>
       </head>
       <body>
         <ConnectionProvider endpoint={endpoint}>
           <WalletProvider wallets={wallets} autoConnect>
             <WalletModalProvider>
-              <Header />
-              <main style={{ minHeight: '80vh' }}>{children}</main>
+              <Navbar />
+              <main>{children}</main>
             </WalletModalProvider>
           </WalletProvider>
         </ConnectionProvider>
