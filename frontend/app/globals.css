@@ -19,6 +19,11 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 120px;
+}
+
 body {
   background-color: var(--black);
   color: var(--white);
