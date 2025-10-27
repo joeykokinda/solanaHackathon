@@ -9,6 +9,7 @@ const creatorsRoutes = require('./routes/creators');
 const tokensRoutes = require('./routes/tokens');
 const usersRoutes = require('./routes/users');
 const transactionsRoutes = require('./routes/transactions');
+const launchRoutes = require('./routes/launch');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -50,6 +51,7 @@ app.use('/api/creators', creatorsRoutes);
 app.use('/api/tokens', tokensRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/transactions', transactionsRoutes);
+app.use('/api/launch', launchRoutes);
 
 app.use((err, req, res, next) => {
   console.error('Error:', err);
