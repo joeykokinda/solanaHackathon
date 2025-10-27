@@ -2,25 +2,38 @@
 
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { AppSidebar } from '@/components/AppSidebar';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { connected } = useWallet();
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
+  const redirectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   useEffect(() => {
-    if (isClient && !connected) {
-      router.push('/');
+    if (redirectTimeoutRef.current) {
+      clearTimeout(redirectTimeoutRef.current);
     }
+
+    if (isClient && !connected) {
+      redirectTimeoutRef.current = setTimeout(() => {
+        router.push('/');
+      }, 1000);
+    }
+
+    return () => {
+      if (redirectTimeoutRef.current) {
+        clearTimeout(redirectTimeoutRef.current);
+      }
+    };
   }, [connected, router, isClient]);
 
-  if (!isClient || !connected) {
+  if (!isClient) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-white">Loading...</div>

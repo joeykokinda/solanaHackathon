@@ -4,6 +4,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { TrendingUp, TrendingDown, Users, Activity, Eye, Video, Play, MessageCircle, ExternalLink } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { buyTokens, sellTokens } from '@/lib/solana';
 
 const getProxiedImageUrl = (url?: string): string | undefined => {
   if (!url || !url.startsWith('https://yt3.ggpht.com/')) {
@@ -15,10 +17,14 @@ const getProxiedImageUrl = (url?: string): string | undefined => {
 export default function CreatorProfile() {
   const params = useParams();
   const router = useRouter();
+  const wallet = useWallet();
   const [creator, setCreator] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'buy' | 'sell'>('buy');
   const [amount, setAmount] = useState('');
+  const [processing, setProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCreator = async () => {
@@ -51,6 +57,52 @@ export default function CreatorProfile() {
   
   const isPositive = creator.priceChange24h >= 0;
   const estimatedCost = parseFloat(amount || '0') * creator.priceSOL;
+
+  const handleTrade = async () => {
+    if (!wallet.connected || !wallet.publicKey) {
+      setError('Please connect your wallet first');
+      return;
+    }
+
+    if (!amount || parseFloat(amount) <= 0) {
+      setError('Please enter a valid amount');
+      return;
+    }
+
+    setProcessing(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const tokenAmount = parseFloat(amount);
+      const solAmount = estimatedCost;
+      const slippage = 0.02;
+
+      let signature: string;
+      
+      if (activeTab === 'buy') {
+        const maxSol = solAmount * (1 + slippage);
+        signature = await buyTokens(wallet, creator.tokenAddress, tokenAmount, maxSol);
+        setSuccess(`✅ Bought ${tokenAmount} tokens! Tx: ${signature.slice(0, 8)}...`);
+      } else {
+        const minSol = solAmount * (1 - slippage);
+        signature = await sellTokens(wallet, creator.tokenAddress, tokenAmount, minSol);
+        setSuccess(`✅ Sold ${tokenAmount} tokens! Tx: ${signature.slice(0, 8)}...`);
+      }
+
+      setAmount('');
+      
+      setTimeout(() => {
+        fetchCreator();
+      }, 2000);
+
+    } catch (err: any) {
+      console.error('Transaction error:', err);
+      setError(err.message || 'Transaction failed. Please try again.');
+    } finally {
+      setProcessing(false);
+    }
+  };
 
   return (
     <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '2.5rem 1.5rem' }}>
@@ -342,12 +394,39 @@ export default function CreatorProfile() {
               </div>
             )}
 
+            {error && (
+              <div style={{ 
+                padding: '1rem', 
+                marginBottom: '1rem', 
+                borderRadius: '0.5rem', 
+                background: 'rgba(239, 68, 68, 0.1)', 
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                color: '#f87171'
+              }}>
+                {error}
+              </div>
+            )}
+
+            {success && (
+              <div style={{ 
+                padding: '1rem', 
+                marginBottom: '1rem', 
+                borderRadius: '0.5rem', 
+                background: 'rgba(16, 185, 129, 0.1)', 
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+                color: '#10b981'
+              }}>
+                {success}
+              </div>
+            )}
+
             <button 
               className="btn-primary" 
               style={{ width: '100%', padding: '1rem', fontSize: '1rem' }}
-              disabled={!amount || parseFloat(amount) <= 0}
+              disabled={!amount || parseFloat(amount) <= 0 || processing || !wallet.connected}
+              onClick={handleTrade}
             >
-              {activeTab === 'buy' ? 'Buy' : 'Sell'} {creator.channelName.split(' ')[0]} Tokens
+              {processing ? 'Processing...' : !wallet.connected ? 'Connect Wallet' : `${activeTab === 'buy' ? 'Buy' : 'Sell'} ${creator.channelName.split(' ')[0]} Tokens`}
             </button>
 
             <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
