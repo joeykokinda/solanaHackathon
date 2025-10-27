@@ -7,7 +7,6 @@ const MOCK_CREATORS = [
   {
     id: 'mock-1',
     channelName: 'TechStartup Daily',
-    channelAvatar: 'https://yt3.ggpht.com/ytc/AIdro_l7JGPKu6JRzE9qk-3qX6',
     tokenAddress: '5Z7vK2mF6tH8nP4wN9bRxYqP3gLtE8dU7sC1wA6hF9pM',
     subscribers: 8500,
     avgViews: 25000,
@@ -22,7 +21,6 @@ const MOCK_CREATORS = [
   {
     id: 'mock-2',
     channelName: 'Gaming Underdog',
-    channelAvatar: 'https://yt3.ggpht.com/ytc/AIdro_mBGHPLv7KS0FarRl',
     tokenAddress: '8K9wL3nG7uI9oQ5xO0cSzZrQ4hMuF9eV8tD2xB7iG0qN',
     subscribers: 2100,
     avgViews: 8000,
@@ -37,7 +35,6 @@ const MOCK_CREATORS = [
   {
     id: 'mock-3',
     channelName: 'Crypto Explained',
-    channelAvatar: 'https://yt3.ggpht.com/ytc/AIdro_nCHIQMw8LT1GbsS',
     tokenAddress: '9L0xM4oH8vJ0pR6yP1dTaAsR5iNvG0fW9uE3yC8jH1rO',
     subscribers: 12000,
     avgViews: 45000,
@@ -52,7 +49,6 @@ const MOCK_CREATORS = [
   {
     id: 'mock-4',
     channelName: 'Fitness Revolution',
-    channelAvatar: 'https://yt3.ggpht.com/ytc/AIdro_oDJKRNx9MU2HctT',
     tokenAddress: '0M1yN5pH9wK1qS7zQ2eUbBtS6jOw H1gX0vF4zD9kI2sP',
     subscribers: 5400,
     avgViews: 18000,
@@ -67,7 +63,6 @@ const MOCK_CREATORS = [
   {
     id: 'mock-5',
     channelName: 'Indie Music Hub',
-    channelAvatar: 'https://yt3.ggpht.com/ytc/AIdro_pEKLSOy0NV3IduU',
     tokenAddress: '1N2zO6qI0xL2rT8aR3fVcCuT7kPxI2hY1wG5aE0lJ3tQ',
     subscribers: 3200,
     avgViews: 12000,

@@ -2,19 +2,48 @@
 
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import PublicNav from '@/components/PublicNav';
 import Aurora from '@/components/ui/Aurora';
-import { MOCK_CREATORS } from '@/lib/mockData';
 import CreatorCard from '@/components/CreatorCard';
-import { motion, useInView } from 'motion/react';
+import { motion, useInView, useScroll, useTransform } from 'motion/react';
 
 export default function LandingPage() {
   const { connected } = useWallet();
   const router = useRouter();
-  const featuredCreators = MOCK_CREATORS.slice(0, 3);
+  const [featuredCreators, setFeaturedCreators] = useState<any[]>([]);
   const textSectionRef = useRef(null);
-  const isInView = useInView(textSectionRef, { once: true, amount: 0.3 });
+  
+  useEffect(() => {
+    const fetchCreators = async () => {
+      try {
+        const response = await fetch('http://localhost:3001/api/creators');
+        const data = await response.json();
+        setFeaturedCreators(data.creators?.slice(0, 3) || []);
+      } catch (error) {
+        console.error('Error fetching creators:', error);
+      }
+    };
+    fetchCreators();
+  }, []);
+  
+  const { scrollYProgress } = useScroll({
+    target: textSectionRef,
+    offset: ["start end", "end start"]
+  });
+
+  const headerOpacity = useTransform(scrollYProgress, [0, 0.2], [0, 1]);
+  const creator1Opacity = useTransform(scrollYProgress, [0.15, 0.3], [0, 1]);
+  const creator1Scale = useTransform(scrollYProgress, [0.15, 0.3], [0.8, 1]);
+  const creator2Opacity = useTransform(scrollYProgress, [0.3, 0.45], [0, 1]);
+  const creator2Scale = useTransform(scrollYProgress, [0.3, 0.45], [0.8, 1]);
+  const creator3Opacity = useTransform(scrollYProgress, [0.45, 0.6], [0, 1]);
+  const creator3Scale = useTransform(scrollYProgress, [0.45, 0.6], [0.8, 1]);
+  const creator4Opacity = useTransform(scrollYProgress, [0.6, 0.75], [0, 1]);
+  const creator4Scale = useTransform(scrollYProgress, [0.6, 0.75], [0.8, 1]);
+  const closingOpacity = useTransform(scrollYProgress, [0.75, 0.85], [0, 1]);
+  const buttonOpacity = useTransform(scrollYProgress, [0.85, 0.95], [0, 1]);
+  const buttonScale = useTransform(scrollYProgress, [0.85, 0.95], [0.9, 1]);
 
   useEffect(() => {
     if (connected) {
@@ -77,90 +106,104 @@ export default function LandingPage() {
           <motion.section 
             ref={textSectionRef}
             style={{ 
-              maxWidth: '1100px', 
-              margin: '8rem auto', 
-              padding: '4rem 2rem',
-              textAlign: 'center'
+              minHeight: '200vh',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              position: 'relative'
             }}
           >
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ duration: 0.5 }}
-              style={{ marginBottom: '3rem' }}
-            >
-              <p style={{ 
-                fontSize: '2rem', 
-                color: 'var(--gray-light)', 
-                lineHeight: 1.6,
-                fontWeight: 400
-              }}>
-                What if you could invest in...
-              </p>
-            </motion.div>
+            <div style={{
+              position: 'sticky',
+              top: '0',
+              height: '100vh',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              maxWidth: '1100px',
+              padding: '2rem',
+              textAlign: 'center'
+            }}>
+              <motion.div
+                style={{ 
+                  opacity: headerOpacity,
+                  marginBottom: '3rem'
+                }}
+              >
+                <p style={{ 
+                  fontSize: '2.5rem', 
+                  color: 'var(--gray-light)', 
+                  lineHeight: 1.6,
+                  fontWeight: 400
+                }}>
+                  What if you could invest in...
+                </p>
+              </motion.div>
 
-            {isInView && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem', marginBottom: '4rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem', marginBottom: '4rem', width: '100%' }}>
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.3, duration: 0.5 }}
+                  style={{
+                    opacity: creator1Opacity,
+                    scale: creator1Scale
+                  }}
                 >
-                  <h2 style={{ fontSize: '3.5rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1.2 }}>
+                  <h2 style={{ fontSize: '4rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1.2 }}>
                     MrBeast
                   </h2>
-                  <p style={{ fontSize: '1.5rem', color: 'var(--gray)' }}>
+                  <p style={{ fontSize: '1.75rem', color: 'var(--gray)' }}>
                     before he hit 1 million subs?
                   </p>
                 </motion.div>
 
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.8, duration: 0.5 }}
+                  style={{
+                    opacity: creator2Opacity,
+                    scale: creator2Scale
+                  }}
                 >
-                  <h2 style={{ fontSize: '3.5rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1.2 }}>
+                  <h2 style={{ fontSize: '4rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1.2 }}>
                     PewDiePie
                   </h2>
-                  <p style={{ fontSize: '1.5rem', color: 'var(--gray)' }}>
+                  <p style={{ fontSize: '1.75rem', color: 'var(--gray)' }}>
                     when he was just a gaming kid in Sweden?
                   </p>
                 </motion.div>
 
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 1.3, duration: 0.5 }}
+                  style={{
+                    opacity: creator3Opacity,
+                    scale: creator3Scale
+                  }}
                 >
-                  <h2 style={{ fontSize: '3.5rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1.2 }}>
+                  <h2 style={{ fontSize: '4rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1.2 }}>
                     Emma Chamberlain
                   </h2>
-                  <p style={{ fontSize: '1.5rem', color: 'var(--gray)' }}>
+                  <p style={{ fontSize: '1.75rem', color: 'var(--gray)' }}>
                     before the coffee empire?
                   </p>
                 </motion.div>
 
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 1.8, duration: 0.5 }}
+                  style={{
+                    opacity: creator4Opacity,
+                    scale: creator4Scale
+                  }}
                 >
-                  <h2 style={{ fontSize: '3.5rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1.2 }}>
+                  <h2 style={{ fontSize: '4rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1.2 }}>
                     Markiplier
                   </h2>
-                  <p style={{ fontSize: '1.5rem', color: 'var(--gray)' }}>
+                  <p style={{ fontSize: '1.75rem', color: 'var(--gray)' }}>
                     when he had 5,000 subscribers?
                   </p>
                 </motion.div>
               </div>
-            )}
 
-            {isInView && (
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 2.5, duration: 0.6 }}
-                style={{ marginBottom: '3rem' }}
+                style={{ 
+                  opacity: closingOpacity,
+                  marginBottom: '3rem'
+                }}
               >
                 <p style={{ 
                   fontSize: '2rem', 
@@ -172,7 +215,7 @@ export default function LandingPage() {
                   You can't go back in time.
                 </p>
                 <p style={{ 
-                  fontSize: '2.5rem', 
+                  fontSize: '2.75rem', 
                   color: 'var(--white)', 
                   fontWeight: 600,
                   lineHeight: 1.4
@@ -180,19 +223,18 @@ export default function LandingPage() {
                   But you can spot the next one.
                 </p>
               </motion.div>
-            )}
 
-            {isInView && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 3.0, duration: 0.5 }}
+                style={{
+                  opacity: buttonOpacity,
+                  scale: buttonScale
+                }}
               >
-                <a href="/app" className="btn-primary" style={{ fontSize: '1.125rem', padding: '1rem 2rem' }}>
+                <a href="/app" className="btn-primary" style={{ fontSize: '1.25rem', padding: '1.25rem 2.5rem' }}>
                   Explore Creators
                 </a>
               </motion.div>
-            )}
+            </div>
           </motion.section>
 
           <section id="how-it-works" style={{ 

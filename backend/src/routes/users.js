@@ -35,20 +35,36 @@ router.get('/:wallet/portfolio', async (req, res) => {
     for (const [tokenAddress, data] of tokenMap) {
       if (data.amount > 0) {
         const creator = await prisma.creator.findUnique({
-          where: { tokenAddress }
+          where: { tokenAddress },
+          include: {
+            metricsHistory: {
+              orderBy: { timestamp: 'desc' },
+              take: 1
+            }
+          }
         });
 
         if (creator) {
           const currentPrice = 0.015;
           const currentValue = Number(data.amount) * currentPrice;
+          const pnl = currentValue - data.invested;
+          const pnlPercent = data.invested > 0 ? (pnl / data.invested) * 100 : 0;
+          const latestMetrics = creator.metricsHistory[0] || {};
 
           holdings.push({
             tokenAddress,
-            creatorName: creator.channelName,
             amount: Number(data.amount),
-            currentValue,
+            value: currentValue,
             invested: data.invested,
-            roi: ((currentValue - data.invested) / data.invested) * 100
+            pnl,
+            pnlPercent,
+            creator: {
+              id: creator.id,
+              channelName: creator.channelName,
+              channelAvatar: creator.channelAvatar,
+              subscribers: latestMetrics.subscribers || creator.initialSubscribers,
+              tokenAddress: creator.tokenAddress
+            }
           });
 
           totalValue += currentValue;

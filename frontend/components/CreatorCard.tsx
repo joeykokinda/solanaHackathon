@@ -20,8 +20,49 @@ interface CreatorCardProps {
   };
 }
 
+const getProxiedImageUrl = (url?: string): string | undefined => {
+  if (!url || !url.startsWith('https://yt3.ggpht.com/')) {
+    return url;
+  }
+  return `http://localhost:3001/api/proxy-image?url=${encodeURIComponent(url)}`;
+};
+
+const getCreatorColor = (channelName: string): string => {
+  const colorMap: { [key: string]: string } = {
+    'fireship': '#FF6B35',
+    'traversy': '#E63946',
+    'net ninja': '#6C63FF',
+    'freecodecamp': '#0A0A23',
+    'codewithharry': '#FF0000',
+    'benjamin cowen': '#4169E1',
+    'lark': '#10B981',
+    'eattheblocks': '#8B5CF6',
+    'boston': '#DC2626',
+    'mrbeast': '#00A8E8',
+    'pewdiepie': '#FF0000',
+    'markiplier': '#E50000',
+    'techstartup': '#4ECDC4',
+    'gaming': '#9D4EDD',
+    'crypto': '#F72585',
+    'fitness': '#06FFA5',
+    'indie': '#FFB703',
+    'music': '#FB5607',
+    'solana': '#14F195',
+    'web3': '#9945FF'
+  };
+
+  const lowerName = channelName.toLowerCase();
+  for (const [key, color] of Object.entries(colorMap)) {
+    if (lowerName.includes(key)) {
+      return color;
+    }
+  }
+  return '#2a2a2a';
+};
+
 export default function CreatorCard({ creator }: CreatorCardProps) {
   const isPositive = creator.priceChange24h >= 0;
+  const brandColor = getCreatorColor(creator.channelName);
   
   return (
     <Link 
@@ -30,30 +71,55 @@ export default function CreatorCard({ creator }: CreatorCardProps) {
     >
       <div className="card" style={{ padding: 0, overflow: 'hidden', cursor: 'pointer' }}>
         <div style={{
-          aspectRatio: '16/9',
-          background: 'linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)',
+          height: '80px',
+          background: `linear-gradient(135deg, ${brandColor} 0%, ${brandColor}dd 100%)`,
           position: 'relative',
           borderBottom: '1px solid var(--border)'
         }}>
-          {creator.channelAvatar && (
+          {creator.channelAvatar ? (
             <img 
-              src={creator.channelAvatar}
-              alt=""
+              src={getProxiedImageUrl(creator.channelAvatar)}
+              alt={`${creator.channelName} avatar`}
               style={{ 
                 position: 'absolute',
-                bottom: '-24px',
+                bottom: '-28px',
                 left: '16px',
-                width: '48px',
-                height: '48px',
+                width: '64px',
+                height: '64px',
                 borderRadius: '50%',
-                border: '2px solid var(--black)',
-                objectFit: 'cover'
+                border: '4px solid var(--black)',
+                objectFit: 'cover',
+                backgroundColor: '#1a1a1a',
+                zIndex: 10
+              }}
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
               }}
             />
+          ) : (
+            <div style={{ 
+              position: 'absolute',
+              bottom: '-28px',
+              left: '16px',
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              border: '4px solid var(--black)',
+              backgroundColor: brandColor,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.5rem',
+              fontWeight: 'bold',
+              color: 'white',
+              zIndex: 10
+            }}>
+              {creator.channelName.charAt(0)}
+            </div>
           )}
         </div>
 
-        <div style={{ padding: '1.5rem', paddingTop: '2rem' }}>
+        <div style={{ padding: '1.5rem', paddingTop: '2.5rem' }}>
           <h3 style={{ fontSize: '1rem', fontWeight: 500, marginBottom: '0.25rem', color: 'var(--white)' }}>
             {creator.channelName}
           </h3>

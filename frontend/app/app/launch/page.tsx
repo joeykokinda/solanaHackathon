@@ -8,11 +8,11 @@ export default function LaunchToken() {
   const [step, setStep] = useState(1);
 
   const mockChannelData = {
-    name: 'TechStartup Daily',
-    avatar: 'https://yt3.ggpht.com/ytc/AIdro_l7JGPKu6JRzE9qk-3qX6',
-    subscribers: 8500,
-    videos: 156,
-    avgViews: 25000
+    name: 'Your Channel',
+    avatar: '',
+    subscribers: 0,
+    videos: 0,
+    avgViews: 0
   };
 
   return (

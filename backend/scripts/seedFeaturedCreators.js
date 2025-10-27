@@ -9,6 +9,11 @@ const FEATURED_CHANNELS = [
   'UCW5YeuERMmlnqo4oq8vwUpg',
   'UC8butISFwT-Wl7EV0hUK0BQ',
   'UCeVMnSShP_Iviwkknt83cww',
+  'UCRvqjQPSeaWn-uEx-w0XOIg',
+  'UCl2oCaw8hdR_kbqyqd2klIA',
+  'UCZM8XQjNOyG2ElPpEUtNasA',
+  'UC4sS8q8E5ayyghbhFl6PNNQ',
+  'UCd1pqe_AX0XLJPeN2RFQcyA',
 ];
 
 async function seedFeaturedCreators() {

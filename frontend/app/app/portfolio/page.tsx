@@ -1,51 +1,57 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import { DollarSign, TrendingUp, Percent, ExternalLink } from 'lucide-react';
+import { DollarSign, TrendingUp, Percent, ExternalLink, Inbox } from 'lucide-react';
 import Link from 'next/link';
-import { MOCK_CREATORS } from '@/lib/mockData';
 
-const MOCK_HOLDINGS = [
-  {
-    creator: MOCK_CREATORS[0],
-    amount: 150,
-    value: 217.50,
-    invested: 175.00,
-    pnl: 42.50,
-    pnlPercent: 24.3
-  },
-  {
-    creator: MOCK_CREATORS[1],
-    amount: 200,
-    value: 160.00,
-    invested: 130.00,
-    pnl: 30.00,
-    pnlPercent: 23.1
-  },
-  {
-    creator: MOCK_CREATORS[2],
-    amount: 100,
-    value: 240.00,
-    invested: 180.00,
-    pnl: 60.00,
-    pnlPercent: 33.3
+const getProxiedImageUrl = (url?: string): string | undefined => {
+  if (!url || !url.startsWith('https://yt3.ggpht.com/')) {
+    return url;
   }
-];
-
-const MOCK_TRANSACTIONS = [
-  { date: 'Oct 24, 2025', time: '2:30 PM', type: 'buy', creator: 'TechStartup Daily', amount: 50, sol: 0.75, signature: '5Z7vK2mF6tH8...' },
-  { date: 'Oct 23, 2025', time: '4:15 PM', type: 'sell', creator: 'Gaming Underdog', amount: 30, sol: 0.24, signature: '8K9wL3nG7uI9...' },
-  { date: 'Oct 22, 2025', time: '11:20 AM', type: 'buy', creator: 'Crypto Explained', amount: 100, sol: 2.40, signature: '9L0xM4oH8vJ0...' },
-];
+  return `http://localhost:3001/api/proxy-image?url=${encodeURIComponent(url)}`;
+};
 
 export default function Portfolio() {
-  const { connected } = useWallet();
-  const totalValue = MOCK_HOLDINGS.reduce((sum, h) => sum + h.value, 0);
-  const totalInvested = MOCK_HOLDINGS.reduce((sum, h) => sum + h.invested, 0);
+  const { connected, publicKey } = useWallet();
+  const [mounted, setMounted] = useState(false);
+  const [holdings, setHoldings] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (connected && publicKey) {
+      fetchPortfolio();
+    }
+  }, [connected, publicKey]);
+
+  const fetchPortfolio = async () => {
+    if (!publicKey) return;
+    
+    try {
+      const response = await fetch(`http://localhost:3001/api/users/${publicKey.toString()}/portfolio`);
+      const data = await response.json();
+      
+      if (data.holdings) {
+        setHoldings(data.holdings);
+      }
+    } catch (error) {
+      setHoldings([]);
+    }
+  };
+
+  const totalValue = holdings.reduce((sum, h) => sum + h.value, 0);
+  const totalInvested = holdings.reduce((sum, h) => sum + h.invested, 0);
   const totalPnL = totalValue - totalInvested;
-  const totalReturn = (totalPnL / totalInvested) * 100;
+  const totalReturn = totalInvested > 0 ? (totalPnL / totalInvested) * 100 : 0;
+
+  if (!mounted) {
+    return <div className="p-8">Loading...</div>;
+  }
 
   if (!connected) {
     return (
@@ -116,71 +122,105 @@ export default function Portfolio() {
           <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Holdings</h2>
         </div>
         
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
-                  Creator
-                </th>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'right', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
-                  Amount
-                </th>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'right', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
-                  Value
-                </th>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'right', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
-                  P&L
-                </th>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'right', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {MOCK_HOLDINGS.map((holding, i) => (
-                <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
-                  <td style={{ padding: '1rem 1.5rem' }}>
-                    <Link href={`/app/creator/${holding.creator.id}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}>
-                      <img 
-                        src={holding.creator.channelAvatar}
-                        alt=""
-                        style={{ width: '32px', height: '32px', borderRadius: '50%' }}
-                      />
-                      <div>
-                        <div style={{ fontWeight: 500, fontSize: '0.9375rem' }}>{holding.creator.channelName}</div>
-                        <div style={{ fontSize: '0.8125rem', color: 'var(--gray)' }}>
-                          {holding.creator.subscribers.toLocaleString()} subs
-                        </div>
-                      </div>
-                    </Link>
-                  </td>
-                  <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontSize: '0.9375rem' }}>
-                    {holding.amount}
-                  </td>
-                  <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: 500, fontVariantNumeric: 'tabular-nums', fontSize: '0.9375rem' }}>
-                    ${holding.value.toFixed(2)}
-                  </td>
-                  <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
-                    <div style={{ color: holding.pnl >= 0 ? 'var(--green)' : 'var(--red)', fontWeight: 500, fontVariantNumeric: 'tabular-nums', fontSize: '0.9375rem' }}>
-                      +${holding.pnl.toFixed(2)}
-                    </div>
-                    <div style={{ fontSize: '0.8125rem', color: holding.pnl >= 0 ? 'var(--green)' : 'var(--red)' }}>
-                      +{holding.pnlPercent.toFixed(1)}%
-                    </div>
-                  </td>
-                  <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
-                    <Link href={`/app/creator/${holding.creator.id}`}>
-                      <button className="btn" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}>
-                        Trade
-                      </button>
-                    </Link>
-                  </td>
+        {holdings.length === 0 ? (
+          <div style={{ padding: '4rem 2rem', textAlign: 'center' }}>
+            <Inbox size={48} style={{ margin: '0 auto 1rem', color: 'var(--gray)' }} />
+            <h3 style={{ fontSize: '1.125rem', marginBottom: '0.5rem' }}>No Holdings Yet</h3>
+            <p style={{ color: 'var(--gray)', marginBottom: '2rem' }}>
+              Start investing in creators to build your portfolio
+            </p>
+            <Link href="/app">
+              <button className="btn-primary">
+                Explore Creators
+              </button>
+            </Link>
+          </div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                  <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
+                    Creator
+                  </th>
+                  <th style={{ padding: '1rem 1.5rem', textAlign: 'right', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
+                    Amount
+                  </th>
+                  <th style={{ padding: '1rem 1.5rem', textAlign: 'right', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
+                    Value
+                  </th>
+                  <th style={{ padding: '1rem 1.5rem', textAlign: 'right', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
+                    P&L
+                  </th>
+                  <th style={{ padding: '1rem 1.5rem', textAlign: 'right', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {holdings.map((holding, i) => (
+                  <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td style={{ padding: '1rem 1.5rem' }}>
+                      <Link href={`/app/creator/${holding.creator.id}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}>
+                        {holding.creator.channelAvatar ? (
+                          <img 
+                            src={getProxiedImageUrl(holding.creator.channelAvatar)}
+                            alt=""
+                            style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }}
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <div style={{ 
+                            width: '32px', 
+                            height: '32px', 
+                            borderRadius: '50%', 
+                            backgroundColor: '#444',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '0.875rem',
+                            fontWeight: 'bold'
+                          }}>
+                            {holding.creator.channelName.charAt(0)}
+                          </div>
+                        )}
+                        <div>
+                          <div style={{ fontWeight: 500, fontSize: '0.9375rem' }}>{holding.creator.channelName}</div>
+                          <div style={{ fontSize: '0.8125rem', color: 'var(--gray)' }}>
+                            {holding.creator.subscribers.toLocaleString()} subs
+                          </div>
+                        </div>
+                      </Link>
+                    </td>
+                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontSize: '0.9375rem' }}>
+                      {holding.amount}
+                    </td>
+                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: 500, fontVariantNumeric: 'tabular-nums', fontSize: '0.9375rem' }}>
+                      ${holding.value.toFixed(2)}
+                    </td>
+                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
+                      <div style={{ color: holding.pnl >= 0 ? 'var(--green)' : 'var(--red)', fontWeight: 500, fontVariantNumeric: 'tabular-nums', fontSize: '0.9375rem' }}>
+                        {holding.pnl >= 0 ? '+' : ''}${holding.pnl.toFixed(2)}
+                      </div>
+                      <div style={{ fontSize: '0.8125rem', color: holding.pnl >= 0 ? 'var(--green)' : 'var(--red)' }}>
+                        {holding.pnl >= 0 ? '+' : ''}{holding.pnlPercent.toFixed(1)}%
+                      </div>
+                    </td>
+                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
+                      <Link href={`/app/creator/${holding.creator.id}`}>
+                        <button className="btn" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}>
+                          Trade
+                        </button>
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       <div className="card-no-hover" style={{ overflow: 'hidden' }}>
@@ -188,72 +228,78 @@ export default function Portfolio() {
           <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Recent Transactions</h2>
         </div>
         
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
-                  Date
-                </th>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
-                  Type
-                </th>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
-                  Creator
-                </th>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'right', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
-                  Amount
-                </th>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'right', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
-                  SOL
-                </th>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'center', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
-                  View
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {MOCK_TRANSACTIONS.map((tx, i) => (
-                <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
-                  <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem' }}>
-                    <div>{tx.date}</div>
-                    <div style={{ color: 'var(--gray)', fontSize: '0.8125rem' }}>{tx.time}</div>
-                  </td>
-                  <td style={{ padding: '1rem 1.5rem' }}>
-                    <span style={{
-                      display: 'inline-block',
-                      padding: '0.25rem 0.625rem',
-                      borderRadius: '0.25rem',
-                      fontSize: '0.8125rem',
-                      fontWeight: 500,
-                      border: `1px solid ${tx.type === 'buy' ? 'var(--green)' : 'var(--red)'}`,
-                      color: tx.type === 'buy' ? 'var(--green)' : 'var(--red)'
-                    }}>
-                      {tx.type.toUpperCase()}
-                    </span>
-                  </td>
-                  <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem' }}>{tx.creator}</td>
-                  <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontSize: '0.875rem' }}>
-                    {tx.amount} tokens
-                  </td>
-                  <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: 500, fontVariantNumeric: 'tabular-nums', fontSize: '0.875rem' }}>
-                    {tx.sol.toFixed(2)} SOL
-                  </td>
-                  <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>
-                    <a 
-                      href={`https://explorer.solana.com/tx/${tx.signature}?cluster=devnet`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: 'var(--gray)', fontSize: '0.875rem' }}
-                    >
-                      <ExternalLink size={14} />
-                    </a>
-                  </td>
+        {transactions.length === 0 ? (
+          <div style={{ padding: '3rem 2rem', textAlign: 'center' }}>
+            <p style={{ color: 'var(--gray)' }}>No transactions yet</p>
+          </div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                  <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
+                    Date
+                  </th>
+                  <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
+                    Type
+                  </th>
+                  <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
+                    Creator
+                  </th>
+                  <th style={{ padding: '1rem 1.5rem', textAlign: 'right', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
+                    Amount
+                  </th>
+                  <th style={{ padding: '1rem 1.5rem', textAlign: 'right', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
+                    SOL
+                  </th>
+                  <th style={{ padding: '1rem 1.5rem', textAlign: 'center', fontSize: '0.875rem', color: 'var(--gray)', fontWeight: 500 }}>
+                    View
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {transactions.map((tx, i) => (
+                  <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem' }}>
+                      <div>{tx.date}</div>
+                      <div style={{ color: 'var(--gray)', fontSize: '0.8125rem' }}>{tx.time}</div>
+                    </td>
+                    <td style={{ padding: '1rem 1.5rem' }}>
+                      <span style={{
+                        display: 'inline-block',
+                        padding: '0.25rem 0.625rem',
+                        borderRadius: '0.25rem',
+                        fontSize: '0.8125rem',
+                        fontWeight: 500,
+                        border: `1px solid ${tx.type === 'buy' ? 'var(--green)' : 'var(--red)'}`,
+                        color: tx.type === 'buy' ? 'var(--green)' : 'var(--red)'
+                      }}>
+                        {tx.type.toUpperCase()}
+                      </span>
+                    </td>
+                    <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem' }}>{tx.creator}</td>
+                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontSize: '0.875rem' }}>
+                      {tx.amount} tokens
+                    </td>
+                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: 500, fontVariantNumeric: 'tabular-nums', fontSize: '0.875rem' }}>
+                      {tx.sol.toFixed(2)} SOL
+                    </td>
+                    <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>
+                      <a 
+                        href={`https://explorer.solana.com/tx/${tx.signature}?cluster=devnet`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: 'var(--gray)', fontSize: '0.875rem' }}
+                      >
+                        <ExternalLink size={14} />
+                      </a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

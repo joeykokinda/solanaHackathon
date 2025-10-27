@@ -1,17 +1,53 @@
 'use client';
 
-import { useParams } from 'next/navigation';
-import { MOCK_CREATORS } from '@/lib/mockData';
+import { useParams, useRouter } from 'next/navigation';
 import { TrendingUp, TrendingDown, Users, Activity, Eye, Video, Play, MessageCircle, ExternalLink } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+
+const getProxiedImageUrl = (url?: string): string | undefined => {
+  if (!url || !url.startsWith('https://yt3.ggpht.com/')) {
+    return url;
+  }
+  return `http://localhost:3001/api/proxy-image?url=${encodeURIComponent(url)}`;
+};
 
 export default function CreatorProfile() {
   const params = useParams();
-  const creator = MOCK_CREATORS.find(c => c.id === params.id) || MOCK_CREATORS[0];
-  
+  const router = useRouter();
+  const [creator, setCreator] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'buy' | 'sell'>('buy');
   const [amount, setAmount] = useState('');
+
+  useEffect(() => {
+    const fetchCreator = async () => {
+      try {
+        const response = await fetch(`http://localhost:3001/api/creators/${params.id}`);
+        if (!response.ok) {
+          router.push('/app');
+          return;
+        }
+        const data = await response.json();
+        setCreator(data);
+      } catch (error) {
+        console.error('Error fetching creator:', error);
+        router.push('/app');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchCreator();
+  }, [params.id, router]);
+
+  if (loading) {
+    return <div className="p-8 text-center">Loading...</div>;
+  }
+
+  if (!creator) {
+    return null;
+  }
   
   const isPositive = creator.priceChange24h >= 0;
   const estimatedCost = parseFloat(amount || '0') * creator.priceSOL;
@@ -30,7 +66,7 @@ export default function CreatorProfile() {
         }}>
           {creator.channelAvatar && (
             <img 
-              src={creator.channelAvatar}
+              src={getProxiedImageUrl(creator.channelAvatar)}
               alt=""
               style={{ 
                 position: 'absolute',
@@ -41,6 +77,9 @@ export default function CreatorProfile() {
                 borderRadius: '50%',
                 border: '4px solid var(--background)',
                 objectFit: 'cover'
+              }}
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
               }}
             />
           )}

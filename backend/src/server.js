@@ -1,6 +1,8 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const https = require('https');
+const http = require('http');
 
 const authRoutes = require('./routes/auth');
 const creatorsRoutes = require('./routes/creators');
@@ -19,6 +21,27 @@ app.use(express.json());
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'YouVest API is running' });
+});
+
+app.get('/api/proxy-image', (req, res) => {
+  const { url } = req.query;
+  
+  if (!url || !url.startsWith('https://yt3.ggpht.com/')) {
+    return res.status(400).send('Invalid URL');
+  }
+
+  try {
+    const protocol = url.startsWith('https') ? https : http;
+    protocol.get(url, (proxyRes) => {
+      res.setHeader('Content-Type', proxyRes.headers['content-type'] || 'image/jpeg');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      proxyRes.pipe(res);
+    }).on('error', () => {
+      res.status(500).send('Error fetching image');
+    });
+  } catch (error) {
+    res.status(500).send('Error proxying image');
+  }
 });
 
 app.use('/api/auth', authRoutes);
