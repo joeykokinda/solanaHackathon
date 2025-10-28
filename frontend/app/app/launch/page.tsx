@@ -202,34 +202,22 @@ export default function LaunchToken() {
 
           <div style={{ 
             padding: '1.25rem',
-            border: '1px solid var(--border)',
+            border: '1px solid rgba(59, 130, 246, 0.3)',
             borderRadius: '0.5rem',
-            textAlign: 'left'
+            textAlign: 'left',
+            background: 'rgba(59, 130, 246, 0.05)'
           }}>
-            <h4 style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.75rem' }}>
-              Requirements:
+            <h4 style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--primary)' }}>
+              🎉 Hackathon Demo Mode
             </h4>
-            <ul style={{ 
-              listStyle: 'none', 
-              padding: 0, 
-              margin: 0, 
+            <p style={{ 
               color: 'var(--gray)',
-              fontSize: '0.875rem',
-              lineHeight: 1.8
+              fontSize: '0.8125rem',
+              lineHeight: 1.6,
+              margin: 0
             }}>
-              <li style={{ paddingLeft: '1.25rem', position: 'relative' }}>
-                <span style={{ position: 'absolute', left: 0 }}>•</span>
-                1,000+ subscribers
-              </li>
-              <li style={{ paddingLeft: '1.25rem', position: 'relative' }}>
-                <span style={{ position: 'absolute', left: 0 }}>•</span>
-                Active channel (10+ videos)
-              </li>
-              <li style={{ paddingLeft: '1.25rem', position: 'relative' }}>
-                <span style={{ position: 'absolute', left: 0 }}>•</span>
-                Regular upload schedule
-              </li>
-            </ul>
+              Requirements disabled for testing! Any YouTube channel can mint a token during the hackathon. In production, channels need 1,000+ subscribers and 10+ videos.
+            </p>
           </div>
         </div>
       )}
