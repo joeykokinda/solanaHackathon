@@ -93,8 +93,37 @@ router.get('/', async (req, res) => {
       orderBy: { launchDate: 'desc' }
     });
 
-    let creatorsWithMetrics = creators.map(creator => {
+    const creatorsWithMetrics = await Promise.all(creators.map(async creator => {
       const latestMetrics = creator.metricsHistory[0] || {};
+      
+      const transactions = await prisma.transaction.findMany({
+        where: { tokenAddress: creator.tokenAddress },
+        orderBy: { timestamp: 'desc' },
+        take: 10
+      });
+
+      const tokensBought = transactions.reduce((sum, tx) => {
+        if (tx.type === 'buy') return sum + Number(tx.tokenAmount);
+        if (tx.type === 'sell') return sum - Number(tx.tokenAmount);
+        return sum;
+      }, 0);
+
+      const basePrice = 0.01;
+      const totalSupply = 100_000_000;
+      const currentPrice = basePrice * (1 + (tokensBought / totalSupply) * 0.5);
+
+      const now = new Date();
+      const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      const txs24h = transactions.filter(tx => tx.timestamp >= oneDayAgo);
+      
+      const volume24h = txs24h.reduce((sum, tx) => sum + Number(tx.solAmount) / 1e9, 0);
+      
+      const priceYesterday = transactions.length > 0 ? Number(transactions[transactions.length - 1].pricePerToken) : basePrice;
+      const priceChange24h = priceYesterday > 0 ? ((currentPrice - priceYesterday) / priceYesterday) * 100 : 0;
+
+      const uniqueWallets = new Set(transactions.map(tx => tx.buyerWallet));
+      const holdersCount = uniqueWallets.size;
+
       return {
         id: creator.id,
         channelName: creator.channelName,
@@ -104,13 +133,15 @@ router.get('/', async (req, res) => {
         avgViews: latestMetrics.avgViews || creator.initialAvgViews,
         engagementScore: latestMetrics.engagementRate || 0,
         uploadFrequency: latestMetrics.uploadFrequency || 0,
-        priceSOL: 0.01 + Math.random() * 0.02,
-        priceChange24h: (Math.random() - 0.5) * 20,
-        volume24h: Math.random() * 10,
-        marketCap: (latestMetrics.subscribers || creator.initialSubscribers) * 0.01,
-        launchDate: creator.launchDate
+        priceSOL: currentPrice,
+        priceChange24h: priceChange24h,
+        volume24h: volume24h,
+        holders: holdersCount,
+        marketCap: currentPrice * totalSupply,
+        launchDate: creator.launchDate,
+        youtubeChannelId: creator.youtubeChannelId
       };
-    });
+    }));
 
     if (creatorsWithMetrics.length === 0) {
       creatorsWithMetrics = MOCK_CREATORS;
@@ -145,6 +176,47 @@ router.get('/:id', async (req, res) => {
 
     const latestMetrics = creator.metricsHistory[creator.metricsHistory.length - 1] || {};
 
+    const transactions = await prisma.transaction.findMany({
+      where: { tokenAddress: creator.tokenAddress },
+      orderBy: { timestamp: 'desc' },
+      take: 20
+    });
+
+    const tokensBought = transactions.reduce((sum, tx) => {
+      if (tx.type === 'buy') return sum + Number(tx.tokenAmount);
+      if (tx.type === 'sell') return sum - Number(tx.tokenAmount);
+      return sum;
+    }, 0);
+
+    const basePrice = 0.01;
+    const totalSupply = 100_000_000;
+    const currentPrice = basePrice * (1 + (tokensBought / totalSupply) * 0.5);
+
+    const now = new Date();
+    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const txs24h = transactions.filter(tx => tx.timestamp >= oneDayAgo);
+    
+    const volume24h = txs24h.reduce((sum, tx) => sum + Number(tx.solAmount) / 1e9, 0);
+    
+    const priceYesterday = transactions.length > 0 ? Number(transactions[transactions.length - 1].pricePerToken) : basePrice;
+    const priceChange24h = priceYesterday > 0 ? ((currentPrice - priceYesterday) / priceYesterday) * 100 : 0;
+
+    const uniqueWallets = new Set(transactions.map(tx => tx.buyerWallet));
+    const holders = uniqueWallets.size;
+
+    const recentTrades = transactions.length > 0 ? transactions.slice(0, 5).map(tx => ({
+      type: tx.type,
+      amount: Number(tx.tokenAmount) / 1e9,
+      price: Number(tx.pricePerToken),
+      time: formatTimeAgo(tx.timestamp),
+      wallet: `${tx.buyerWallet.slice(0, 4)}...${tx.buyerWallet.slice(-4)}`
+    })) : [];
+
+    const metricsHistorySerialized = creator.metricsHistory.map(m => ({
+      ...m,
+      totalViews: Number(m.totalViews)
+    }));
+
     res.json({
       id: creator.id,
       channelName: creator.channelName,
@@ -154,17 +226,36 @@ router.get('/:id', async (req, res) => {
       subscribers: latestMetrics.subscribers || creator.initialSubscribers,
       avgViews: latestMetrics.avgViews || creator.initialAvgViews,
       engagementScore: latestMetrics.engagementRate || 0,
-      uploadFrequency: latestMetrics.uploadFrequency || 0,
+      uploadFrequency: latestMetrics.uploadFrequency || 3.5,
+      priceSOL: currentPrice,
+      priceChange24h: priceChange24h,
+      volume24h: volume24h,
+      holders: holders,
+      marketCap: currentPrice * totalSupply,
       launchDate: creator.launchDate,
-      metricsHistory: creator.metricsHistory,
+      metricsHistory: metricsHistorySerialized,
       initialSubscribers: creator.initialSubscribers,
-      initialAvgViews: creator.initialAvgViews
+      initialAvgViews: creator.initialAvgViews,
+      recentTrades: recentTrades,
+      recentVideos: []
     });
   } catch (error) {
     console.error('Error fetching creator:', error);
-    res.status(500).json({ error: 'Failed to fetch creator' });
+    console.error('Stack:', error.stack);
+    res.status(500).json({ error: 'Failed to fetch creator', details: error.message });
   }
 });
+
+function formatTimeAgo(date) {
+  const seconds = Math.floor((new Date() - date) / 1000);
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
 
 router.post('/launch', async (req, res) => {
   try {
