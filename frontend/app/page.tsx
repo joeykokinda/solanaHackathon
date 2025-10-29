@@ -50,12 +50,12 @@ export default function LandingPage() {
   return (
     <>
       <PublicNav />
-      <div style={{ position: 'relative', minHeight: '100vh' }}>
+      <div style={{ position: 'relative', minHeight: '100vh', backgroundColor: '#000000' }}>
         <Aurora 
-          colorStops={['#0a0a0a', '#1a1a1a', '#0a0a0a']}
-          amplitude={0.6}
-          blend={0.3}
-          speed={0.2}
+          colorStops={['#0a0a0a', '#1a1a1a', '#0f0f0f', '#1a1a1a', '#0a0a0a']}
+          amplitude={1.0}
+          blend={0.5}
+          speed={0.3}
         />
         <div style={{ position: 'relative', zIndex: 1 }}>
           <section style={{ 
@@ -75,7 +75,13 @@ export default function LandingPage() {
               marginBottom: '1.5rem',
               lineHeight: 1.1
             }}>
-              Invest in Creators<br />Before They Blow Up
+              Invest in Creators<br />
+              <span style={{
+                background: 'linear-gradient(135deg, #00FFA3 0%, #DC1FFF 50%, #00FFA3 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}>BEFORE</span> They Blow Up
             </h1>
             <p style={{ 
               fontSize: '1.25rem', 
