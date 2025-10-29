@@ -1,17 +1,13 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-
 export default function PublicNav() {
   const [scrolled, setScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
-
   useEffect(() => {
     setMounted(true);
   }, []);
-
   useEffect(() => {
     const handleScroll = () => {
       const isScrolled = window.scrollY > 80;
@@ -19,11 +15,9 @@ export default function PublicNav() {
         setScrolled(isScrolled);
       }
     };
-    
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [scrolled]);
-
   return (
     <>
       <style jsx global>{`
@@ -63,7 +57,6 @@ export default function PublicNav() {
             <a href="/" className="flex items-center gap-2 text-white text-xl font-bold z-10">
               <span>YouVest</span>
             </a>
-
             <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-6 text-sm">
               <a href="#how-it-works" className="text-gray-300 hover:text-white transition-colors">
                 How It Works
@@ -78,7 +71,6 @@ export default function PublicNav() {
                 FAQ
               </a>
             </div>
-
             <div className="shrink-0 z-10">
               {mounted ? <WalletMultiButton /> : <div style={{ width: '140px', height: '36px' }} />}
             </div>
@@ -88,4 +80,3 @@ export default function PublicNav() {
     </>
   );
 }
-

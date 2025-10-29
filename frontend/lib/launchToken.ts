@@ -13,12 +13,9 @@ import {
   getCreateMetadataAccountV3InstructionDataSerializer,
   MPL_TOKEN_METADATA_PROGRAM_ID
 } from '@metaplex-foundation/mpl-token-metadata';
-
 import { SOLANA_RPC, API_URL } from './config';
-
 const TOKEN_FACTORY_PROGRAM_ID = new PublicKey('7yNsJvKUNgxdAHgCRY2SWb7GqsaL5HxTgSfpraHQCYdh');
 const BONDING_CURVE_PROGRAM_ID = new PublicKey('ASKaLZvuV9TW6MKxNjQoKAQihzEAaVDzMryFqgvzDswi');
-
 interface LaunchTokenParams {
   wallet: WalletContextState;
   channelData: {
@@ -30,7 +27,6 @@ interface LaunchTokenParams {
     videoCount: number;
   };
 }
-
 export async function launchCreatorToken({ wallet, channelData }: LaunchTokenParams): Promise<{
   tokenMint: string;
   signature: string;
@@ -38,32 +34,24 @@ export async function launchCreatorToken({ wallet, channelData }: LaunchTokenPar
   if (!wallet.publicKey || !wallet.signTransaction) {
     throw new Error('Wallet not connected');
   }
-
   const connection = new Connection(SOLANA_RPC, 'confirmed');
-
   const mintKeypair = Keypair.generate();
   const mintPubkey = mintKeypair.publicKey;
-
   const rentLamports = await getMinimumBalanceForRentExemptMint(connection);
-
   const [bondingCurve] = PublicKey.findProgramAddressSync(
     [Buffer.from('bonding_curve'), mintPubkey.toBuffer()],
     BONDING_CURVE_PROGRAM_ID
   );
-
   const [solVault] = PublicKey.findProgramAddressSync(
     [Buffer.from('sol_vault'), bondingCurve.toBuffer()],
     BONDING_CURVE_PROGRAM_ID
   );
-
   const tokenVault = await getAssociatedTokenAddress(
     mintPubkey,
     bondingCurve,
     true
   );
-
   const transaction = new Transaction();
-
   transaction.add(
     SystemProgram.createAccount({
       fromPubkey: wallet.publicKey,
@@ -73,7 +61,6 @@ export async function launchCreatorToken({ wallet, channelData }: LaunchTokenPar
       programId: TOKEN_PROGRAM_ID,
     })
   );
-
   transaction.add(
     createInitializeMint2Instruction(
       mintPubkey,
@@ -83,10 +70,8 @@ export async function launchCreatorToken({ wallet, channelData }: LaunchTokenPar
       TOKEN_PROGRAM_ID
     )
   );
-
   const { createMintToInstruction, createSetAuthorityInstruction, AuthorityType, createAssociatedTokenAccountInstruction } = await import('@solana/spl-token');
   const TOTAL_SUPPLY = 1_000_000_000n * 1_000_000_000n;
-  
   transaction.add(
     createAssociatedTokenAccountInstruction(
       wallet.publicKey,
@@ -95,7 +80,6 @@ export async function launchCreatorToken({ wallet, channelData }: LaunchTokenPar
       mintPubkey
     )
   );
-
   transaction.add(
     createMintToInstruction(
       mintPubkey,
@@ -106,8 +90,6 @@ export async function launchCreatorToken({ wallet, channelData }: LaunchTokenPar
       TOKEN_PROGRAM_ID
     )
   );
-
-  // Add token metadata BEFORE transferring authority
   const [metadataPDA] = PublicKey.findProgramAddressSync(
     [
       Buffer.from('metadata'),
@@ -116,12 +98,10 @@ export async function launchCreatorToken({ wallet, channelData }: LaunchTokenPar
     ],
     new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID)
   );
-
   const tokenSymbol = channelData.channelName
     .replace(/[^a-zA-Z0-9]/g, '')
     .substring(0, 10)
     .toUpperCase();
-
   const metadataData = getCreateMetadataAccountV3InstructionDataSerializer().serialize({
     data: {
       name: channelData.channelName.substring(0, 32),
@@ -135,10 +115,8 @@ export async function launchCreatorToken({ wallet, channelData }: LaunchTokenPar
     isMutable: true,
     collectionDetails: null,
   });
-
   const { TransactionInstruction } = await import('@solana/web3.js');
   const SYSVAR_RENT_PUBKEY = new PublicKey('SysvarRent111111111111111111111111111111111');
-  
   const metadataIx = new TransactionInstruction({
     keys: [
       { pubkey: metadataPDA, isSigner: false, isWritable: true },
@@ -152,10 +130,7 @@ export async function launchCreatorToken({ wallet, channelData }: LaunchTokenPar
     programId: new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID),
     data: Buffer.from(metadataData),
   });
-
   transaction.add(metadataIx);
-
-  // NOW transfer authority to bonding curve AFTER metadata is created
   transaction.add(
     createSetAuthorityInstruction(
       mintPubkey,
@@ -166,11 +141,9 @@ export async function launchCreatorToken({ wallet, channelData }: LaunchTokenPar
       TOKEN_PROGRAM_ID
     )
   );
-
   const initCurveData = Buffer.concat([
     Buffer.from([170, 84, 186, 253, 131, 149, 95, 213])
   ]);
-
   transaction.add({
     keys: [
       { pubkey: wallet.publicKey, isSigner: true, isWritable: true },
@@ -185,38 +158,28 @@ export async function launchCreatorToken({ wallet, channelData }: LaunchTokenPar
     programId: BONDING_CURVE_PROGRAM_ID,
     data: initCurveData,
   });
-
   transaction.feePayer = wallet.publicKey;
   const { blockhash } = await connection.getLatestBlockhash();
   transaction.recentBlockhash = blockhash;
-
   transaction.partialSign(mintKeypair);
-
   const signed = await wallet.signTransaction(transaction);
   const signature = await connection.sendRawTransaction(signed.serialize());
-  
   console.log('Token creation tx:', signature);
   await connection.confirmTransaction(signature, 'confirmed');
-
-  // Give creator initial allocation (100 tokens for demo)
   console.log('Buying creator initial allocation...');
   try {
     const { buyTokens } = await import('./solana');
-    const initialAllocation = 100; // Start with 100 tokens  
-    const maxSol = 1.5; // 1.5 SOL max (affordable on devnet)
-    
+    const initialAllocation = 100; 
+    const maxSol = 1.5; 
     await buyTokens(wallet, mintPubkey.toString(), initialAllocation, maxSol);
-    console.log('✅ Creator received', initialAllocation, 'tokens');
+    console.log(' Creator received', initialAllocation, 'tokens');
   } catch (e: any) {
-    // Ignore duplicate transaction errors - transaction likely succeeded
     if (e.message?.includes('already been processed')) {
-      console.log('✅ Transaction already processed - tokens allocated');
+      console.log(' Transaction already processed - tokens allocated');
     } else {
-      console.error('⚠️ Creator buy failed - you can buy tokens manually:', e.message);
+      console.error('️ Creator buy failed - you can buy tokens manually:', e.message);
     }
-    // Don't fail the whole launch if creator buy fails
   }
-
   await fetch(`${API_URL}/api/launch/create-token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -231,10 +194,8 @@ export async function launchCreatorToken({ wallet, channelData }: LaunchTokenPar
       tokenMint: mintPubkey.toString()
     })
   });
-
   return {
     tokenMint: mintPubkey.toString(),
     signature
   };
 }
-

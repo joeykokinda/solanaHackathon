@@ -1,26 +1,21 @@
 const { google } = require('googleapis');
-
 const youtube = google.youtube({
   version: 'v3',
   auth: process.env.YOUTUBE_API_KEY,
 });
-
 async function getChannelData(channelId) {
   try {
     const response = await youtube.channels.list({
       part: ['snippet', 'statistics', 'brandingSettings'],
       id: [channelId],
     });
-
     if (!response.data.items || response.data.items.length === 0) {
       throw new Error('Channel not found');
     }
-
     const channel = response.data.items[0];
     const stats = channel.statistics;
     const snippet = channel.snippet;
     const branding = channel.brandingSettings;
-
     return {
       channelId: channel.id,
       name: snippet.title,
@@ -38,7 +33,6 @@ async function getChannelData(channelId) {
     throw error;
   }
 }
-
 async function getChannelVideos(channelId, maxResults = 10) {
   try {
     const response = await youtube.search.list({
@@ -48,18 +42,14 @@ async function getChannelVideos(channelId, maxResults = 10) {
       type: 'video',
       maxResults: maxResults,
     });
-
     if (!response.data.items) {
       return [];
     }
-
     const videoIds = response.data.items.map(item => item.id.videoId).join(',');
-    
     const videoStats = await youtube.videos.list({
       part: ['statistics'],
       id: videoIds,
     });
-
     const videos = response.data.items.map((item, index) => {
       const stats = videoStats.data.items[index]?.statistics || {};
       return {
@@ -73,19 +63,16 @@ async function getChannelVideos(channelId, maxResults = 10) {
         comments: parseInt(stats.commentCount || 0),
       };
     });
-
     return videos;
   } catch (error) {
     console.error('Error fetching channel videos:', error.message);
     throw error;
   }
 }
-
 async function calculateAvgViews(channelId) {
   try {
     const videos = await getChannelVideos(channelId, 20);
     if (videos.length === 0) return 0;
-    
     const totalViews = videos.reduce((sum, video) => sum + video.views, 0);
     return Math.floor(totalViews / videos.length);
   } catch (error) {
@@ -93,10 +80,8 @@ async function calculateAvgViews(channelId) {
     return 0;
   }
 }
-
 module.exports = {
   getChannelData,
   getChannelVideos,
   calculateAvgViews,
 };
-

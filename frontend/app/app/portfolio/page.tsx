@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
@@ -8,14 +7,12 @@ import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 import Link from 'next/link';
 import { getUserTokenBalance } from '@/lib/solana';
 import { API_URL } from '@/lib/config';
-
 const getProxiedImageUrl = (url?: string): string | undefined => {
   if (!url || !url.startsWith('https://yt3.ggpht.com/')) {
     return url;
   }
   return `${API_URL}/api/proxy-image?url=${encodeURIComponent(url)}`;
 };
-
 export default function Portfolio() {
   const { connected, publicKey } = useWallet();
   const { connection } = useConnection();
@@ -24,11 +21,9 @@ export default function Portfolio() {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [solBalance, setSolBalance] = useState(0);
-  
   useEffect(() => {
     setMounted(true);
   }, []);
-
   useEffect(() => {
     if (connected && publicKey) {
       fetchPortfolio();
@@ -36,7 +31,6 @@ export default function Portfolio() {
       fetchTransactions();
     }
   }, [connected, publicKey]);
-
   const fetchSolBalance = async () => {
     if (!publicKey) return;
     try {
@@ -46,7 +40,6 @@ export default function Portfolio() {
       console.error('Error fetching SOL balance:', error);
     }
   };
-
   const fetchTransactions = async () => {
     if (!publicKey) return;
     try {
@@ -59,29 +52,23 @@ export default function Portfolio() {
       console.error('Error fetching transactions:', error);
     }
   };
-
   const fetchPortfolio = async () => {
     if (!publicKey) return;
-    
     setLoading(true);
     try {
       const { getActualSellReturn } = await import('@/lib/solana');
       const creatorsResponse = await fetch(`${API_URL}/api/creators`);
       const creatorsData = await creatorsResponse.json();
-      
       const holdingsPromises = creatorsData.creators.map(async (creator: any) => {
         try {
           const balance = await getUserTokenBalance(publicKey.toString(), creator.tokenAddress);
           if (balance > 0) {
-            // Calculate actual sell value through bonding curve
             let valueInSOL = 0;
             try {
               valueInSOL = await getActualSellReturn(creator.tokenAddress, balance);
             } catch (e) {
-              // Fallback to simple calculation if bonding curve fails
               valueInSOL = balance * creator.priceSOL;
             }
-            
             return {
               creator,
               amount: balance,
@@ -96,10 +83,8 @@ export default function Portfolio() {
           return null;
         }
       });
-      
       const allHoldings = await Promise.all(holdingsPromises);
       const validHoldings = allHoldings.filter(h => h !== null);
-      
       setHoldings(validHoldings);
     } catch (error) {
       console.error('Error fetching portfolio:', error);
@@ -108,16 +93,13 @@ export default function Portfolio() {
       setLoading(false);
     }
   };
-
   const totalValue = holdings.reduce((sum, h) => sum + h.value, 0);
   const totalInvested = holdings.reduce((sum, h) => sum + h.invested, 0);
   const totalPnL = totalValue - totalInvested;
   const totalReturn = totalInvested > 0 ? (totalPnL / totalInvested) * 100 : 0;
-
   if (!mounted) {
     return <div style={{ padding: '2rem' }}>Loading...</div>;
   }
-
   if (!connected) {
     return (
       <div style={{ 
@@ -140,11 +122,9 @@ export default function Portfolio() {
       </div>
     );
   }
-
   return (
     <div style={{ padding: '2rem', maxWidth: '1600px', margin: '0 auto' }}>
       <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '2rem' }}>Portfolio</h1>
-
       <div style={{ 
         display: 'grid', 
         gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
@@ -159,7 +139,6 @@ export default function Portfolio() {
             {solBalance.toFixed(4)} SOL
           </p>
         </div>
-
         <div className="card-no-hover" style={{ padding: '1.5rem' }}>
           <div style={{ fontSize: '0.875rem', color: 'var(--gray)', marginBottom: '0.5rem' }}>
             Portfolio Value
@@ -168,7 +147,6 @@ export default function Portfolio() {
             {totalValue.toFixed(4)} SOL
           </p>
         </div>
-
         <div className="card-no-hover" style={{ padding: '1.5rem' }}>
           <div style={{ fontSize: '0.875rem', color: 'var(--gray)', marginBottom: '0.5rem' }}>
             Total Invested
@@ -177,7 +155,6 @@ export default function Portfolio() {
             {totalInvested.toFixed(4)} SOL
           </p>
         </div>
-
         <div className="card-no-hover" style={{ padding: '1.5rem' }}>
           <div style={{ fontSize: '0.875rem', color: 'var(--gray)', marginBottom: '0.5rem' }}>
             Total Returns
@@ -190,12 +167,10 @@ export default function Portfolio() {
           </p>
         </div>
       </div>
-
       <div className="card-no-hover" style={{ marginBottom: '2rem', overflow: 'hidden' }}>
         <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border)' }}>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Holdings</h2>
         </div>
-        
         {loading ? (
           <div style={{ padding: '3rem 2rem', textAlign: 'center' }}>
             <p style={{ color: 'var(--gray)' }}>Loading holdings...</p>
@@ -300,12 +275,10 @@ export default function Portfolio() {
           </div>
         )}
       </div>
-
       <div className="card-no-hover" style={{ overflow: 'hidden' }}>
         <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border)' }}>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Recent Transactions</h2>
         </div>
-        
         {transactions.length === 0 ? (
           <div style={{ padding: '3rem 2rem', textAlign: 'center' }}>
             <p style={{ color: 'var(--gray)' }}>No transactions yet</p>

@@ -1,12 +1,10 @@
 'use client';
-
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { usePathname } from 'next/navigation';
 import { TrendingUp, Wallet, Rocket, LogOut, Coins } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { API_URL } from '@/lib/config';
-
 export function AppSidebar() {
   const { publicKey, disconnect } = useWallet();
   const { connection } = useConnection();
@@ -14,7 +12,6 @@ export function AppSidebar() {
   const [userCreator, setUserCreator] = useState<any>(null);
   const [loadingCreator, setLoadingCreator] = useState(true);
   const [solBalance, setSolBalance] = useState<number | null>(null);
-
   useEffect(() => {
     if (publicKey) {
       fetch(`${API_URL}/api/creators`)
@@ -27,7 +24,6 @@ export function AppSidebar() {
           setLoadingCreator(false);
         })
         .catch(() => setLoadingCreator(false));
-
       const fetchBalance = async () => {
         try {
           const balance = await connection.getBalance(publicKey);
@@ -37,12 +33,10 @@ export function AppSidebar() {
         }
       };
       fetchBalance();
-      
       const interval = setInterval(fetchBalance, 10000);
       return () => clearInterval(interval);
     }
   }, [publicKey, connection]);
-
   const links = [
     { label: 'Markets', href: '/app', icon: TrendingUp },
     { label: 'Portfolio', href: '/app/portfolio', icon: Wallet },
@@ -50,11 +44,9 @@ export function AppSidebar() {
       ? { label: 'Your Token', href: `/app/creator/${userCreator.id}`, icon: Rocket }
       : { label: 'Launch', href: '/app/launch', icon: Rocket },
   ];
-
   const shortenAddress = (address: string) => {
     return `${address.slice(0, 4)}...${address.slice(-4)}`;
   };
-
   return (
     <div style={{
       width: '240px',
@@ -85,7 +77,6 @@ export function AppSidebar() {
           color: 'white',
         }}>YouVest</span>
       </a>
-
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
         {links.map((link) => {
           const Icon = link.icon;
@@ -122,7 +113,6 @@ export function AppSidebar() {
           );
         })}
       </div>
-
       <div style={{
         borderTop: '1px solid rgba(255, 255, 255, 0.1)',
         paddingTop: '1rem',
@@ -172,7 +162,6 @@ export function AppSidebar() {
             </div>
           </div>
         )}
-
         <button
           onClick={() => disconnect()}
           style={{
@@ -203,4 +192,3 @@ export function AppSidebar() {
     </div>
   );
 }
-

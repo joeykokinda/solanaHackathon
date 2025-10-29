@@ -13,38 +13,28 @@ const {
   getAssociatedTokenAddress
 } = require('@solana/spl-token');
 const fs = require('fs');
-
 const prisma = new PrismaClient();
 const RPC_ENDPOINT = 'https://api.devnet.solana.com';
 const BONDING_CURVE_PROGRAM_ID = new PublicKey('ASKaLZvuV9TW6MKxNjQoKAQihzEAaVDzMryFqgvzDswi');
-
 async function createTokenForCreator(connection, payerKeypair, creator) {
-  console.log(`\n🚀 Creating token for ${creator.channelName}...`);
-
+  console.log(`\n Creating token for ${creator.channelName}...`);
   const mintKeypair = Keypair.generate();
   const mintPubkey = mintKeypair.publicKey;
-
   const rentLamports = await getMinimumBalanceForRentExemptMint(connection);
-
   const [bondingCurve] = PublicKey.findProgramAddressSync(
     [Buffer.from('bonding_curve'), mintPubkey.toBuffer()],
     BONDING_CURVE_PROGRAM_ID
   );
-
   const [solVault] = PublicKey.findProgramAddressSync(
     [Buffer.from('sol_vault'), bondingCurve.toBuffer()],
     BONDING_CURVE_PROGRAM_ID
   );
-
   const tokenVault = await getAssociatedTokenAddress(
     mintPubkey,
     bondingCurve,
     true
   );
-
   const transaction = new Transaction();
-
-  // Create mint account
   transaction.add(
     SystemProgram.createAccount({
       fromPubkey: payerKeypair.publicKey,
@@ -54,8 +44,6 @@ async function createTokenForCreator(connection, payerKeypair, creator) {
       programId: TOKEN_PROGRAM_ID,
     })
   );
-
-  // Initialize mint with payer as authority
   transaction.add(
     createInitializeMint2Instruction(
       mintPubkey,
@@ -65,8 +53,6 @@ async function createTokenForCreator(connection, payerKeypair, creator) {
       TOKEN_PROGRAM_ID
     )
   );
-
-  // Create token vault (ATA for bonding curve)
   transaction.add(
     createAssociatedTokenAccountInstruction(
       payerKeypair.publicKey,
@@ -75,8 +61,6 @@ async function createTokenForCreator(connection, payerKeypair, creator) {
       mintPubkey
     )
   );
-
-  // Mint total supply to token vault
   const TOTAL_SUPPLY = 1_000_000_000n * 1_000_000_000n;
   transaction.add(
     createMintToInstruction(
@@ -88,8 +72,6 @@ async function createTokenForCreator(connection, payerKeypair, creator) {
       TOKEN_PROGRAM_ID
     )
   );
-
-  // Transfer mint authority to bonding curve
   transaction.add(
     createSetAuthorityInstruction(
       mintPubkey,
@@ -100,12 +82,9 @@ async function createTokenForCreator(connection, payerKeypair, creator) {
       TOKEN_PROGRAM_ID
     )
   );
-
-  // Initialize bonding curve
   const initCurveData = Buffer.concat([
-    Buffer.from([170, 84, 186, 253, 131, 149, 95, 213]) // initialize_curve discriminator
+    Buffer.from([170, 84, 186, 253, 131, 149, 95, 213]) 
   ]);
-
   transaction.add({
     keys: [
       { pubkey: payerKeypair.publicKey, isSigner: true, isWritable: true },
@@ -120,56 +99,41 @@ async function createTokenForCreator(connection, payerKeypair, creator) {
     programId: BONDING_CURVE_PROGRAM_ID,
     data: initCurveData,
   });
-
   transaction.feePayer = payerKeypair.publicKey;
   const { blockhash } = await connection.getLatestBlockhash();
   transaction.recentBlockhash = blockhash;
-
   transaction.partialSign(mintKeypair, payerKeypair);
-
   try {
     const signature = await connection.sendRawTransaction(transaction.serialize());
     await connection.confirmTransaction(signature, 'confirmed');
-    
-    console.log(`✅ Token created: ${mintPubkey.toString()}`);
+    console.log(` Token created: ${mintPubkey.toString()}`);
     console.log(`   Bonding Curve: ${bondingCurve.toString()}`);
     console.log(`   Tx: https://explorer.solana.com/tx/${signature}?cluster=devnet`);
-    
     return mintPubkey.toString();
   } catch (error) {
-    console.error(`❌ Error creating token:`, error.message);
+    console.error(` Error creating token:`, error.message);
     throw error;
   }
 }
-
 async function main() {
-  console.log('🚀 Creating REAL tokens for mock creators...\n');
-
-  // Load wallet
+  console.log(' Creating REAL tokens for mock creators...\n');
   const walletPath = '/home/joey/.config/solana/id.json';
   if (!fs.existsSync(walletPath)) {
-    console.error('❌ Wallet not found at:', walletPath);
+    console.error(' Wallet not found at:', walletPath);
     console.log('Run: solana-keygen new');
     process.exit(1);
   }
-
   const walletData = JSON.parse(fs.readFileSync(walletPath, 'utf-8'));
   const payerKeypair = Keypair.fromSecretKey(new Uint8Array(walletData));
-  
-  console.log(`💰 Using wallet: ${payerKeypair.publicKey.toString()}\n`);
-
+  console.log(` Using wallet: ${payerKeypair.publicKey.toString()}\n`);
   const connection = new Connection(RPC_ENDPOINT, 'confirmed');
-
-  // Get balance
   const balance = await connection.getBalance(payerKeypair.publicKey);
   console.log(`   Balance: ${(balance / 1e9).toFixed(4)} SOL\n`);
-
   if (balance < 0.5e9) {
-    console.error('❌ Insufficient balance! Need at least 0.5 SOL');
+    console.error(' Insufficient balance! Need at least 0.5 SOL');
     console.log('Run: solana airdrop 2');
     process.exit(1);
   }
-
   const mockCreators = [
     {
       youtubeChannelId: 'UCX6OQ3DkcsbYNE6H8uQQuVA',
@@ -211,26 +175,17 @@ async function main() {
       holders: 634
     }
   ];
-
   for (const creator of mockCreators) {
     try {
-      // Check if already exists
       const existing = await prisma.creator.findUnique({
         where: { youtubeChannelId: creator.youtubeChannelId }
       });
-
       if (existing) {
-        console.log(`✓ ${creator.channelName} already exists with token: ${existing.tokenAddress}`);
+        console.log(` ${creator.channelName} already exists with token: ${existing.tokenAddress}`);
         continue;
       }
-
-      // Create real token
       const tokenAddress = await createTokenForCreator(connection, payerKeypair, creator);
-
-      // Create a placeholder user for this creator
       const mockWallet = Keypair.generate().publicKey.toString();
-      
-      // Add to database
       await prisma.creator.create({
         data: {
           youtubeChannelId: creator.youtubeChannelId,
@@ -246,20 +201,15 @@ async function main() {
           }
         }
       });
-
-      console.log(`✅ Added ${creator.channelName} to database\n`);
-
-      // Wait a bit between creations
+      console.log(` Added ${creator.channelName} to database\n`);
       await new Promise(resolve => setTimeout(resolve, 2000));
     } catch (error) {
-      console.error(`❌ Error processing ${creator.channelName}:`, error.message);
+      console.error(` Error processing ${creator.channelName}:`, error.message);
     }
   }
-
-  console.log('\n✨ Done! Real tokens created for all mock creators.');
-  console.log('🚀 Users can now buy/sell these tokens on your website!');
+  console.log('\n Done! Real tokens created for all mock creators.');
+  console.log(' Users can now buy/sell these tokens on your website!');
 }
-
 main()
   .catch((e) => {
     console.error(e);
@@ -268,4 +218,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
-

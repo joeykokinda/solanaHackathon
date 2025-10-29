@@ -1,16 +1,11 @@
 const { PrismaClient } = require('@prisma/client');
-
-// This script seeds the 3 real working tokens to production
-// Run with: DATABASE_URL="your_railway_postgres_url" node scripts/seedProductionCreators.js
-
 const prisma = new PrismaClient();
-
 const REAL_WORKING_TOKENS = [
   {
     youtubeChannelId: 'UCX6OQ3DkcsbYNE6H8uQQuVA',
     channelName: 'MrBeast',
     channelAvatar: 'https://yt3.ggpht.com/ytc/AIdro_mEDPNTFdXRKvhYZvNZpOhFaxwzO87d8jUY1MjPNq2s6g=s176-c-k-c0x00ffffff-no-rj',
-    tokenAddress: 'G8JLfLwkam6jqvXo8e4qSZeT45LFqz8Uy4ptNzzWdi3x', // REAL working token
+    tokenAddress: 'G8JLfLwkam6jqvXo8e4qSZeT45LFqz8Uy4ptNzzWdi3x', 
     subscribers: 234000000,
     avgViews: 95000000,
     videoCount: 741,
@@ -26,7 +21,7 @@ const REAL_WORKING_TOKENS = [
     youtubeChannelId: 'UCsBjURrPoezykLs9EqgamOA',
     channelName: 'Fireship',
     channelAvatar: 'https://yt3.ggpht.com/ytc/AIdro_kGrQl33_1gWpVJuHqxFKYhZXFmvCmyD4i7xCr6c4DKVA=s176-c-k-c0x00ffffff-no-rj',
-    tokenAddress: 'FRwCkwrbUDQJeU3X7KNVwNXSDbJ4jD7jfPpxd6s6wMAj', // REAL working token
+    tokenAddress: 'FRwCkwrbUDQJeU3X7KNVwNXSDbJ4jD7jfPpxd6s6wMAj', 
     subscribers: 3200000,
     avgViews: 850000,
     videoCount: 523,
@@ -42,7 +37,7 @@ const REAL_WORKING_TOKENS = [
     youtubeChannelId: 'UCW5YeuERMmlnqo4oq8vwUpg',
     channelName: 'NetworkChuck',
     channelAvatar: 'https://yt3.ggpht.com/ytc/AIdro_nMZrEZ4NzXqFQRJJz8mPRnhU4s9-VbYCYbqgXYKFHOtA=s176-c-k-c0x00ffffff-no-rj',
-    tokenAddress: 'GK8jPUUeYj7kwGgUkvzdhuDhkxJBrqzExS8KefNTnq8A', // REAL working token
+    tokenAddress: 'GK8jPUUeYj7kwGgUkvzdhuDhkxJBrqzExS8KefNTnq8A', 
     subscribers: 4100000,
     avgViews: 650000,
     videoCount: 312,
@@ -55,26 +50,18 @@ const REAL_WORKING_TOKENS = [
     initialAvgViews: 650000
   }
 ];
-
 async function seedProduction() {
-  console.log('🌱 Seeding production with 3 REAL working tokens...\n');
-
+  console.log(' Seeding production with 3 REAL working tokens...\n');
   for (const creator of REAL_WORKING_TOKENS) {
     try {
-      // Check if already exists
       const existing = await prisma.creator.findUnique({
         where: { youtubeChannelId: creator.youtubeChannelId }
       });
-
       if (existing) {
-        console.log(`✓ ${creator.channelName} already exists with token: ${existing.tokenAddress}`);
+        console.log(` ${creator.channelName} already exists with token: ${existing.tokenAddress}`);
         continue;
       }
-
-      // Create a placeholder user for this creator (random UUID)
       const mockWallet = `mock_${creator.youtubeChannelId}_${Date.now()}`;
-
-      // Add to database
       await prisma.creator.create({
         data: {
           youtubeChannelId: creator.youtubeChannelId,
@@ -90,17 +77,14 @@ async function seedProduction() {
           }
         }
       });
-
-      console.log(`✅ Added ${creator.channelName} (${creator.tokenAddress})`);
+      console.log(` Added ${creator.channelName} (${creator.tokenAddress})`);
     } catch (error) {
-      console.error(`❌ Error adding ${creator.channelName}:`, error.message);
+      console.error(` Error adding ${creator.channelName}:`, error.message);
     }
   }
-
-  console.log('\n✨ Production seeding complete!');
-  console.log('🚀 These tokens have REAL bonding curves and working buy/sell!');
+  console.log('\n Production seeding complete!');
+  console.log(' These tokens have REAL bonding curves and working buy/sell!');
 }
-
 seedProduction()
   .catch((e) => {
     console.error('Fatal error:', e);
@@ -109,4 +93,3 @@ seedProduction()
   .finally(async () => {
     await prisma.$disconnect();
   });
-

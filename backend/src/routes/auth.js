@@ -1,15 +1,12 @@
 const express = require('express');
 const { google } = require('googleapis');
 const router = express.Router();
-
 const REDIRECT_URI = process.env.YOUTUBE_REDIRECT_URI || 'http://localhost:3000/app/launch/callback';
-
 const oauth2Client = new google.auth.OAuth2(
   process.env.YOUTUBE_CLIENT_ID,
   process.env.YOUTUBE_CLIENT_SECRET,
   REDIRECT_URI
 );
-
 router.post('/youtube', (req, res) => {
   const url = oauth2Client.generateAuthUrl({
     access_type: 'offline',
@@ -17,31 +14,23 @@ router.post('/youtube', (req, res) => {
   });
   res.json({ authUrl: url });
 });
-
 router.get('/youtube/callback', async (req, res) => {
   const { code } = req.query;
-  
   if (!code) {
     return res.status(400).json({ error: 'Authorization code required' });
   }
-
   try {
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
-    
     const youtube = google.youtube({ version: 'v3', auth: oauth2Client });
-    
     const response = await youtube.channels.list({
       part: 'snippet,statistics',
       mine: true
     });
-    
     if (!response.data.items || response.data.items.length === 0) {
       return res.status(404).json({ error: 'No YouTube channel found' });
     }
-
     const channel = response.data.items[0];
-    
     res.json({
       youtubeChannelId: channel.id,
       channelName: channel.snippet.title,
@@ -57,6 +46,4 @@ router.get('/youtube/callback', async (req, res) => {
     res.status(500).json({ error: 'Failed to authenticate with YouTube' });
   }
 });
-
 module.exports = router;
-

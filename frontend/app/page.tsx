@@ -1,5 +1,4 @@
 'use client';
-
 import { useWallet } from '@solana/wallet-adapter-react';
 import { API_URL } from '@/lib/config';
 import { useRouter } from 'next/navigation';
@@ -7,12 +6,10 @@ import { useEffect, useState } from 'react';
 import PublicNav from '@/components/PublicNav';
 import Aurora from '@/components/ui/Aurora';
 import CreatorCard from '@/components/CreatorCard';
-
 export default function LandingPage() {
   const { connected } = useWallet();
   const router = useRouter();
   const [featuredCreators, setFeaturedCreators] = useState<any[]>([]);
-  
   useEffect(() => {
     const fetchCreators = async () => {
       try {
@@ -25,15 +22,12 @@ export default function LandingPage() {
     };
     fetchCreators();
   }, []);
-
   useEffect(() => {
     const handleScroll = () => {
       const revealLines = document.querySelectorAll('.reveal-line');
-      
       revealLines.forEach((line) => {
         const rect = line.getBoundingClientRect();
         const windowHeight = window.innerHeight;
-        
         if (rect.top <= windowHeight * 0.75) {
           const delay = parseInt(line.getAttribute('data-delay') || '0');
           setTimeout(() => {
@@ -44,19 +38,15 @@ export default function LandingPage() {
         }
       });
     };
-
     window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Check on mount
-    
+    handleScroll(); 
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
   useEffect(() => {
     if (connected) {
       router.push('/app');
     }
   }, [connected, router]);
-
   return (
     <>
       <PublicNav />
@@ -67,7 +57,6 @@ export default function LandingPage() {
           blend={0.3}
           speed={0.2}
         />
-        
         <div style={{ position: 'relative', zIndex: 1 }}>
           <section style={{ 
             maxWidth: '1200px', 
@@ -88,7 +77,6 @@ export default function LandingPage() {
             }}>
               Invest in Creators<br />Before They Blow Up
             </h1>
-            
             <p style={{ 
               fontSize: '1.25rem', 
               color: 'var(--gray-light)', 
@@ -98,7 +86,6 @@ export default function LandingPage() {
             }}>
               Buy tokens of YouTubers with 1k-50k subs. Profit as they grow.
             </p>
-
             <div style={{ 
               display: 'flex', 
               gap: '1rem', 
@@ -113,7 +100,6 @@ export default function LandingPage() {
               </a>
             </div>
           </section>
-
           <section style={{ 
             maxWidth: '800px',
             margin: '0 auto',
@@ -134,7 +120,6 @@ export default function LandingPage() {
               }}>
                 What if you found MrBeast at 1,000 subscribers?
               </h2>
-              
               <p style={{ 
                 fontSize: '1.75rem', 
                 color: 'var(--gray-light)', 
@@ -145,7 +130,6 @@ export default function LandingPage() {
               }} className="reveal-line" data-delay="0">
                 PewDiePie filming in his Swedish bedroom.
               </p>
-              
               <p style={{ 
                 fontSize: '1.75rem', 
                 color: 'var(--gray-light)', 
@@ -156,7 +140,6 @@ export default function LandingPage() {
               }} className="reveal-line" data-delay="1">
                 Emma Chamberlain before her first brand deal.
               </p>
-              
               <p style={{ 
                 fontSize: '1.75rem', 
                 color: 'var(--gray-light)', 
@@ -169,7 +152,6 @@ export default function LandingPage() {
               </p>
             </div>
           </section>
-
           <section id="how-it-works" style={{ 
             maxWidth: '1000px', 
             margin: '0 auto',
@@ -179,30 +161,27 @@ export default function LandingPage() {
             <h2 style={{ fontSize: '2.5rem', marginBottom: '4rem' }}>
               How It Works
             </h2>
-
             <div style={{ 
               display: 'grid', 
               gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
               gap: '2rem'
             }}>
               <div className="card-no-hover" style={{ padding: '2rem' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔍</div>
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}></div>
                 <h3 style={{ marginBottom: '0.75rem' }}>Discover</h3>
                 <p style={{ color: 'var(--gray)', lineHeight: 1.6 }}>
                   Find early-stage YouTubers with 1k-50k subscribers using YouTube API data
                 </p>
               </div>
-
               <div className="card-no-hover" style={{ padding: '2rem' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>💰</div>
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}></div>
                 <h3 style={{ marginBottom: '0.75rem' }}>Invest</h3>
                 <p style={{ color: 'var(--gray)', lineHeight: 1.6 }}>
                   Buy creator tokens on Solana. Price increases as more people buy (bonding curve)
                 </p>
               </div>
-
               <div className="card-no-hover" style={{ padding: '2rem' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📈</div>
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}></div>
                 <h3 style={{ marginBottom: '0.75rem' }}>Track</h3>
                 <p style={{ color: 'var(--gray)', lineHeight: 1.6 }}>
                   Watch token value grow as creators gain subs. Sell anytime for profit (or loss)
@@ -210,7 +189,6 @@ export default function LandingPage() {
               </div>
             </div>
           </section>
-
           {featuredCreators.length > 0 && (
             <section id="featured" style={{ 
               maxWidth: '1200px',
@@ -220,7 +198,6 @@ export default function LandingPage() {
               <h2 style={{ fontSize: '2rem', marginBottom: '3rem', textAlign: 'center' }}>
                 Featured Creators
               </h2>
-
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
@@ -231,7 +208,6 @@ export default function LandingPage() {
                   <CreatorCard key={creator.id} creator={creator} />
                 ))}
               </div>
-
               <div style={{ textAlign: 'center' }}>
                 <a href="/app" className="btn">
                   View All Creators →
@@ -239,7 +215,6 @@ export default function LandingPage() {
               </div>
             </section>
           )}
-
           <section style={{ 
             maxWidth: '1200px',
             margin: '0 auto',
@@ -249,7 +224,6 @@ export default function LandingPage() {
             <h2 style={{ fontSize: '2.5rem', marginBottom: '4rem' }}>
               Why YouVest?
             </h2>
-
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
@@ -257,21 +231,19 @@ export default function LandingPage() {
               textAlign: 'left'
             }}>
               <div className="card-no-hover" style={{ padding: '2rem' }}>
-                <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⚡</div>
+                <div style={{ fontSize: '2rem', marginBottom: '1rem' }}></div>
                 <h3 style={{ marginBottom: '0.75rem', fontSize: '1.25rem' }}>Spot Talent Early</h3>
                 <p style={{ color: 'var(--gray-light)', lineHeight: 1.6 }}>
                   Get in before they blow up. Tokens are cheapest when creators have &lt;5k subs.
                 </p>
               </div>
-
               <div className="card-no-hover" style={{ padding: '2rem' }}>
-                <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🔐</div>
+                <div style={{ fontSize: '2rem', marginBottom: '1rem' }}></div>
                 <h3 style={{ marginBottom: '0.75rem', fontSize: '1.25rem' }}>Fair Pricing</h3>
                 <p style={{ color: 'var(--gray-light)', lineHeight: 1.6 }}>
                   Bonding curve = no BS. Price goes up with demand, down with sells. Pure math.
                 </p>
               </div>
-
               <div className="card-no-hover" style={{ padding: '2rem' }}>
                 <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <svg width="32" height="32" viewBox="0 0 397.7 311.7" style={{ display: 'block' }}>
@@ -290,7 +262,6 @@ export default function LandingPage() {
               </div>
             </div>
           </section>
-
           <section id="for-creators" style={{ 
             maxWidth: '1000px',
             margin: '0 auto',
@@ -300,7 +271,6 @@ export default function LandingPage() {
             <h2 style={{ fontSize: '2.5rem', marginBottom: '1.5rem' }}>
               Are You a Creator?
             </h2>
-            
             <p style={{ 
               fontSize: '1.25rem', 
               color: 'var(--gray-light)', 
@@ -310,7 +280,6 @@ export default function LandingPage() {
             }}>
               Launch your own token in minutes. Connect your YouTube channel and let your fans invest in your growth.
             </p>
-
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
@@ -318,13 +287,12 @@ export default function LandingPage() {
               marginBottom: '3rem'
             }}>
               <div className="card-no-hover" style={{ padding: '2rem', textAlign: 'center' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎥</div>
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}></div>
                 <h3 style={{ marginBottom: '0.75rem', fontSize: '1.125rem' }}>Connect YouTube</h3>
                 <p style={{ color: 'var(--gray)', lineHeight: 1.6, fontSize: '0.95rem' }}>
                   Verify ownership of your channel with one click
                 </p>
               </div>
-
               <div className="card-no-hover" style={{ padding: '2rem', textAlign: 'center' }}>
                 <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🪙</div>
                 <h3 style={{ marginBottom: '0.75rem', fontSize: '1.125rem' }}>Launch Token</h3>
@@ -332,21 +300,18 @@ export default function LandingPage() {
                   Create a real token on Solana with a bonding curve
                 </p>
               </div>
-
               <div className="card-no-hover" style={{ padding: '2rem', textAlign: 'center' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📊</div>
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}></div>
                 <h3 style={{ marginBottom: '0.75rem', fontSize: '1.125rem' }}>Grow Together</h3>
                 <p style={{ color: 'var(--gray)', lineHeight: 1.6, fontSize: '0.95rem' }}>
                   Your fans profit when you grow. Built-in liquidity
                 </p>
               </div>
             </div>
-
             <a href="/app/launch" className="btn-primary" style={{ fontSize: '1.125rem', padding: '1rem 2rem' }}>
               Launch Your Token →
             </a>
           </section>
-
           <section id="faq" style={{ 
             maxWidth: '800px', 
             margin: '0 auto',
@@ -355,7 +320,6 @@ export default function LandingPage() {
             <h2 style={{ fontSize: '2.5rem', marginBottom: '4rem', textAlign: 'center' }}>
               FAQ
             </h2>
-
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <div className="card-no-hover" style={{ padding: '2rem', textAlign: 'left' }}>
                 <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>How does the bonding curve work?</h3>
@@ -363,35 +327,30 @@ export default function LandingPage() {
                   More buyers = higher price. More sellers = lower price. It's automatic - no market manipulation possible.
                 </p>
               </div>
-
               <div className="card-no-hover" style={{ padding: '2rem', textAlign: 'left' }}>
                 <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>Can I actually sell my tokens?</h3>
                 <p style={{ color: 'var(--gray-light)', lineHeight: 1.6 }}>
                   Yes. Sell back to the bonding curve anytime. Liquidity is built-in.
                 </p>
               </div>
-
               <div className="card-no-hover" style={{ padding: '2rem', textAlign: 'left' }}>
                 <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>What if the creator stops posting?</h3>
                 <p style={{ color: 'var(--gray-light)', lineHeight: 1.6 }}>
                   Then your token probably drops in value. This is risky - only invest what you can lose.
                 </p>
               </div>
-
               <div className="card-no-hover" style={{ padding: '2rem', textAlign: 'left' }}>
                 <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>Do creators know about this?</h3>
                 <p style={{ color: 'var(--gray-light)', lineHeight: 1.6 }}>
                   Not yet. We're pulling public YouTube data. Creators can claim their profile later for rewards.
                 </p>
               </div>
-
               <div className="card-no-hover" style={{ padding: '2rem', textAlign: 'left' }}>
                 <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>Is this legal?</h3>
                 <p style={{ color: 'var(--gray-light)', lineHeight: 1.6 }}>
                   We're not financial advisors. This is experimental DeFi. DYOR (do your own research).
                 </p>
               </div>
-
               <div className="card-no-hover" style={{ padding: '2rem', textAlign: 'left' }}>
                 <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>What's the catch?</h3>
                 <p style={{ color: 'var(--gray-light)', lineHeight: 1.6 }}>
@@ -400,7 +359,6 @@ export default function LandingPage() {
               </div>
             </div>
           </section>
-
           <section style={{ 
             maxWidth: '800px',
             margin: '0 auto',
@@ -410,7 +368,6 @@ export default function LandingPage() {
             <h2 style={{ fontSize: '2.5rem', marginBottom: '1.5rem' }}>
               Ready to Find the Next MrBeast?
             </h2>
-
             <p style={{ 
               fontSize: '1.125rem', 
               color: 'var(--gray-light)',
@@ -420,12 +377,10 @@ export default function LandingPage() {
             }}>
               Connect your Solana wallet and start discovering underrated creators.
             </p>
-
             <a href="/app" className="btn-primary" style={{ fontSize: '1.125rem' }}>
               Launch App
             </a>
           </section>
-
           <footer style={{ 
             padding: '4rem 2rem',
             borderTop: '1px solid var(--border)',

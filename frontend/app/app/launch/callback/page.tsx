@@ -1,15 +1,11 @@
 'use client';
-
 import { useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-
 export default function YouTubeCallback() {
   const searchParams = useSearchParams();
-
   useEffect(() => {
     const code = searchParams.get('code');
     const error = searchParams.get('error');
-
     if (window.opener) {
       if (error) {
         window.opener.postMessage({ type: 'youtube-auth-error', error }, window.location.origin);
@@ -19,7 +15,6 @@ export default function YouTubeCallback() {
       window.close();
     }
   }, [searchParams]);
-
   return (
     <div style={{ 
       display: 'flex', 
@@ -36,4 +31,3 @@ export default function YouTubeCallback() {
     </div>
   );
 }
-

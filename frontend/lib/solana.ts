@@ -2,12 +2,9 @@ import { Connection, PublicKey, SystemProgram, Transaction, TransactionInstructi
 import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddress } from '@solana/spl-token';
 import { WalletContextState } from '@solana/wallet-adapter-react';
 import BN from 'bn.js';
-
 import { SOLANA_RPC, API_URL } from './config';
-
 const BONDING_CURVE_PROGRAM_ID = new PublicKey('ASKaLZvuV9TW6MKxNjQoKAQihzEAaVDzMryFqgvzDswi');
 const RPC_ENDPOINT = SOLANA_RPC;
-
 const bondingCurveIDL = {
   "address": "ASKaLZvuV9TW6MKxNjQoKAQihzEAaVDzMryFqgvzDswi",
   "metadata": {
@@ -76,14 +73,12 @@ const bondingCurveIDL = {
     }
   ]
 };
-
 export async function getBondingCurveAddress(tokenMint: PublicKey): Promise<[PublicKey, number]> {
   return PublicKey.findProgramAddressSync(
     [Buffer.from('bonding_curve'), tokenMint.toBuffer()],
     BONDING_CURVE_PROGRAM_ID
   );
 }
-
 function calculateBuyCost(
   currentSupply: bigint,
   amount: bigint,
@@ -91,27 +86,21 @@ function calculateBuyCost(
   engagementMultiplier: bigint
 ): bigint {
   const SCALE_FACTOR = BigInt(1_000_000_000);
-  
   const supplyBeforeTokens = currentSupply / SCALE_FACTOR;
   let amountTokens = amount / SCALE_FACTOR;
   if (amountTokens === BigInt(0)) {
     amountTokens = BigInt(1);
   }
   const supplyAfterTokens = supplyBeforeTokens + amountTokens;
-  
   const curveBefore = (supplyBeforeTokens * supplyBeforeTokens) / BigInt(10_000);
   const curveAfter = (supplyAfterTokens * supplyAfterTokens) / BigInt(10_000);
-  
   const priceBefore = basePrice + curveBefore;
   const priceAfter = basePrice + curveAfter;
   const avgPrice = (priceBefore + priceAfter) / BigInt(2);
-  
   const totalCost = (avgPrice * amount) / SCALE_FACTOR;
   const finalCost = (totalCost * engagementMultiplier) / SCALE_FACTOR;
-  
   return finalCost;
 }
-
 function calculateSellReturn(
   currentSupply: bigint,
   amount: bigint,
@@ -119,7 +108,6 @@ function calculateSellReturn(
   engagementMultiplier: bigint
 ): bigint {
   const SCALE_FACTOR = BigInt(1_000_000_000);
-  
   const supplyBeforeTokens = currentSupply / SCALE_FACTOR;
   let amountTokens = amount / SCALE_FACTOR;
   if (amountTokens === BigInt(0)) {
@@ -128,24 +116,18 @@ function calculateSellReturn(
   const supplyAfterTokens = supplyBeforeTokens > amountTokens 
     ? supplyBeforeTokens - amountTokens 
     : BigInt(0);
-  
   const curveBefore = (supplyBeforeTokens * supplyBeforeTokens) / BigInt(10_000);
   const curveAfter = (supplyAfterTokens * supplyAfterTokens) / BigInt(10_000);
-  
   const priceBefore = basePrice + curveBefore;
   const priceAfter = basePrice + curveAfter;
   const avgPrice = (priceBefore + priceAfter) / BigInt(2);
-  
   const totalReturn = (avgPrice * amount) / SCALE_FACTOR;
   const finalReturn = (totalReturn * engagementMultiplier) / SCALE_FACTOR;
-  
   return finalReturn;
 }
-
 export async function getConnection(): Promise<Connection> {
   return new Connection(RPC_ENDPOINT, 'confirmed');
 }
-
 export async function getUserTokenBalance(
   walletPublicKey: string,
   tokenMintAddress: string
@@ -154,20 +136,17 @@ export async function getUserTokenBalance(
     const connection = await getConnection();
     const tokenMint = new PublicKey(tokenMintAddress);
     const walletPubkey = new PublicKey(walletPublicKey);
-    
     const tokenAccount = await getAssociatedTokenAddress(
       tokenMint,
       walletPubkey,
       false
     );
-    
     const accountInfo = await connection.getTokenAccountBalance(tokenAccount);
     return Number(accountInfo.value.amount) / 1e9;
   } catch (error) {
     return 0;
   }
 }
-
 export async function getTokensFromSolBuy(
   tokenMintAddress: string,
   solAmount: number
@@ -176,20 +155,15 @@ export async function getTokensFromSolBuy(
     const connection = await getConnection();
     const tokenMint = new PublicKey(tokenMintAddress);
     const [bondingCurve] = await getBondingCurveAddress(tokenMint);
-    
     const bondingCurveAccount = await connection.getAccountInfo(bondingCurve);
     if (!bondingCurveAccount) {
       throw new Error('Bonding curve not initialized');
     }
-    
     const bondingCurveData = deserializeBondingCurve(bondingCurveAccount.data);
-    
     const targetSolLamports = BigInt(Math.floor(solAmount * LAMPORTS_PER_SOL));
-    
     let low = BigInt(1_000_000);
     let high = BigInt(1_000_000_000) * BigInt(1_000_000_000);
     let bestTokens = BigInt(0);
-    
     for (let i = 0; i < 60; i++) {
       const mid = (low + high) / BigInt(2);
       const cost = calculateBuyCost(
@@ -198,29 +172,24 @@ export async function getTokensFromSolBuy(
         BigInt(bondingCurveData.base_price.toString()),
         BigInt(bondingCurveData.engagement_multiplier.toString())
       );
-      
       if (cost <= targetSolLamports) {
         bestTokens = mid;
         low = mid + BigInt(1);
       } else {
         high = mid - BigInt(1);
       }
-      
       if (high <= low) break;
     }
-    
     if (bestTokens === BigInt(0)) {
       const directCalc = (targetSolLamports * BigInt(1e9)) / BigInt(bondingCurveData.base_price.toString());
       return Math.max(1, Number(directCalc) / 1e9);
     }
-    
     return Math.max(1, Number(bestTokens) / 1e9);
   } catch (error) {
     console.error('Error calculating tokens from SOL:', error);
     return Math.floor(solAmount / 0.000001);
   }
 }
-
 export async function getTokensFromSolSell(
   tokenMintAddress: string,
   solAmount: number
@@ -229,25 +198,19 @@ export async function getTokensFromSolSell(
     const connection = await getConnection();
     const tokenMint = new PublicKey(tokenMintAddress);
     const [bondingCurve] = await getBondingCurveAddress(tokenMint);
-    
     const bondingCurveAccount = await connection.getAccountInfo(bondingCurve);
     if (!bondingCurveAccount) {
       throw new Error('Bonding curve not initialized');
     }
-    
     const bondingCurveData = deserializeBondingCurve(bondingCurveAccount.data);
-    
     const targetSolLamports = BigInt(Math.floor(solAmount * LAMPORTS_PER_SOL));
     const maxTokens = BigInt(bondingCurveData.tokens_bought.toString());
-    
     if (maxTokens === BigInt(0)) {
       return 0;
     }
-    
     let low = BigInt(1_000_000);
     let high = maxTokens;
     let bestTokens = BigInt(0);
-    
     for (let i = 0; i < 60; i++) {
       const mid = (low + high) / BigInt(2);
       const returnAmount = calculateSellReturn(
@@ -256,24 +219,20 @@ export async function getTokensFromSolSell(
         BigInt(bondingCurveData.base_price.toString()),
         BigInt(bondingCurveData.engagement_multiplier.toString())
       );
-      
       if (returnAmount <= targetSolLamports) {
         bestTokens = mid;
         low = mid + BigInt(1);
       } else {
         high = mid - BigInt(1);
       }
-      
       if (high <= low) break;
     }
-    
     return Math.max(0.001, Number(bestTokens) / 1e9);
   } catch (error) {
     console.error('Error calculating tokens from SOL sell:', error);
     return 0;
   }
 }
-
 export async function getActualBuyCost(
   tokenMintAddress: string,
   amount: number
@@ -281,24 +240,19 @@ export async function getActualBuyCost(
   const connection = await getConnection();
   const tokenMint = new PublicKey(tokenMintAddress);
   const [bondingCurve] = await getBondingCurveAddress(tokenMint);
-  
   const bondingCurveAccount = await connection.getAccountInfo(bondingCurve);
   if (!bondingCurveAccount) {
     throw new Error('Bonding curve not initialized');
   }
-  
   const bondingCurveData = deserializeBondingCurve(bondingCurveAccount.data);
-  
   const actualCost = calculateBuyCost(
     BigInt(bondingCurveData.tokens_bought.toString()),
     BigInt(Math.floor(amount * 1e9)),
     BigInt(bondingCurveData.base_price.toString()),
     BigInt(bondingCurveData.engagement_multiplier.toString())
   );
-  
   return Number(actualCost) / LAMPORTS_PER_SOL;
 }
-
 export async function getActualSellReturn(
   tokenMintAddress: string,
   amount: number
@@ -306,24 +260,19 @@ export async function getActualSellReturn(
   const connection = await getConnection();
   const tokenMint = new PublicKey(tokenMintAddress);
   const [bondingCurve] = await getBondingCurveAddress(tokenMint);
-  
   const bondingCurveAccount = await connection.getAccountInfo(bondingCurve);
   if (!bondingCurveAccount) {
     throw new Error('Bonding curve not initialized');
   }
-  
   const bondingCurveData = deserializeBondingCurve(bondingCurveAccount.data);
-  
   const actualReturn = calculateSellReturn(
     BigInt(bondingCurveData.tokens_bought.toString()),
     BigInt(Math.floor(amount * 1e9)),
     BigInt(bondingCurveData.base_price.toString()),
     BigInt(bondingCurveData.engagement_multiplier.toString())
   );
-  
   return Number(actualReturn) / LAMPORTS_PER_SOL;
 }
-
 export async function buyTokens(
   wallet: WalletContextState,
   tokenMintAddress: string,
@@ -333,20 +282,16 @@ export async function buyTokens(
   if (!wallet.publicKey || !wallet.signTransaction) {
     throw new Error('Wallet not connected');
   }
-
   const connection = await getConnection();
   const tokenMint = new PublicKey(tokenMintAddress);
   const [bondingCurve] = await getBondingCurveAddress(tokenMint);
-
   const bondingCurveAccount = await connection.getAccountInfo(bondingCurve);
   if (!bondingCurveAccount) {
     throw new Error('Bonding curve not initialized for this token');
   }
-
   const bondingCurveData = deserializeBondingCurve(bondingCurveAccount.data);
   const solVault = bondingCurveData.sol_vault;
   const tokenVault = bondingCurveData.token_vault;
-
   const buyerTokenAccount = await getAssociatedTokenAddress(
     tokenMint,
     wallet.publicKey,
@@ -354,17 +299,13 @@ export async function buyTokens(
     TOKEN_PROGRAM_ID,
     ASSOCIATED_TOKEN_PROGRAM_ID
   );
-
   const transaction = new Transaction();
-
   transaction.add(
     ComputeBudgetProgram.setComputeUnitLimit({ units: 1_400_000 })
   );
   transaction.add(
     ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 100 })
   );
-
-  // Check if buyer's token account exists, if not, create it
   const buyerAccountInfo = await connection.getAccountInfo(buyerTokenAccount);
   if (!buyerAccountInfo) {
     const { createAssociatedTokenAccountInstruction } = await import('@solana/spl-token');
@@ -377,20 +318,16 @@ export async function buyTokens(
       )
     );
   }
-
   const tokenAmountBN = new BN(amount * 1e9);
-  
   const actualCost = calculateBuyCost(
     BigInt(bondingCurveData.tokens_bought.toString()),
     BigInt(Math.floor(amount * 1e9)),
     BigInt(bondingCurveData.base_price.toString()),
     BigInt(bondingCurveData.engagement_multiplier.toString())
   );
-  
   const slippageFactor = BigInt(Math.floor(1.2 * 1e9));
   const maxSolLamports = (actualCost * slippageFactor) / BigInt(1e9);
   const maxSolBN = new BN(maxSolLamports.toString());
-
   const instruction = createBuyInstruction(
     wallet.publicKey,
     bondingCurve,
@@ -400,21 +337,16 @@ export async function buyTokens(
     tokenAmountBN,
     maxSolBN
   );
-
   transaction.add(instruction);
   transaction.feePayer = wallet.publicKey;
   transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-
   const signed = await wallet.signTransaction(transaction);
   const signature = await connection.sendRawTransaction(signed.serialize());
   await connection.confirmTransaction(signature, 'confirmed');
-
   const actualMaxSol = Number(maxSolLamports) / LAMPORTS_PER_SOL;
   await recordTransaction(signature, wallet.publicKey.toString(), tokenMintAddress, 'buy', amount, actualMaxSol);
-
   return signature;
 }
-
 export async function sellTokens(
   wallet: WalletContextState,
   tokenMintAddress: string,
@@ -424,20 +356,16 @@ export async function sellTokens(
   if (!wallet.publicKey || !wallet.signTransaction) {
     throw new Error('Wallet not connected');
   }
-
   const connection = await getConnection();
   const tokenMint = new PublicKey(tokenMintAddress);
   const [bondingCurve] = await getBondingCurveAddress(tokenMint);
-
   const bondingCurveAccount = await connection.getAccountInfo(bondingCurve);
   if (!bondingCurveAccount) {
     throw new Error('Bonding curve not initialized for this token');
   }
-
   const bondingCurveData = deserializeBondingCurve(bondingCurveAccount.data);
   const solVault = bondingCurveData.sol_vault;
   const tokenVault = bondingCurveData.token_vault;
-
   const sellerTokenAccount = await getAssociatedTokenAddress(
     tokenMint,
     wallet.publicKey,
@@ -445,29 +373,23 @@ export async function sellTokens(
     TOKEN_PROGRAM_ID,
     ASSOCIATED_TOKEN_PROGRAM_ID
   );
-
   const tokenAmountBN = new BN(amount * 1e9);
-  
   const actualReturn = calculateSellReturn(
     BigInt(bondingCurveData.tokens_bought.toString()),
     BigInt(Math.floor(amount * 1e9)),
     BigInt(bondingCurveData.base_price.toString()),
     BigInt(bondingCurveData.engagement_multiplier.toString())
   );
-  
   const slippageFactor = BigInt(Math.floor(0.8 * 1e9));
   const minSolLamports = (actualReturn * slippageFactor) / BigInt(1e9);
   const minSolBN = new BN(minSolLamports.toString());
-
   const transaction = new Transaction();
-
   transaction.add(
     ComputeBudgetProgram.setComputeUnitLimit({ units: 1_400_000 })
   );
   transaction.add(
     ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 100 })
   );
-
   const instruction = createSellInstruction(
     wallet.publicKey,
     bondingCurve,
@@ -477,21 +399,16 @@ export async function sellTokens(
     tokenAmountBN,
     minSolBN
   );
-
   transaction.add(instruction);
   transaction.feePayer = wallet.publicKey;
   transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-
   const signed = await wallet.signTransaction(transaction);
   const signature = await connection.sendRawTransaction(signed.serialize());
   await connection.confirmTransaction(signature, 'confirmed');
-
   const actualMinSol = Number(minSolLamports) / LAMPORTS_PER_SOL;
   await recordTransaction(signature, wallet.publicKey.toString(), tokenMintAddress, 'sell', amount, actualMinSol);
-
   return signature;
 }
-
 function createBuyInstruction(
   buyer: PublicKey,
   bondingCurve: PublicKey,
@@ -505,7 +422,6 @@ function createBuyInstruction(
   const tokenAmountBytes = tokenAmount.toArrayLike(Buffer, 'le', 8);
   const maxSolBytes = maxSol.toArrayLike(Buffer, 'le', 8);
   const data = Buffer.concat([discriminator, tokenAmountBytes, maxSolBytes]);
-
   return new TransactionInstruction({
     keys: [
       { pubkey: buyer, isSigner: true, isWritable: true },
@@ -521,7 +437,6 @@ function createBuyInstruction(
     data,
   });
 }
-
 function createSellInstruction(
   seller: PublicKey,
   bondingCurve: PublicKey,
@@ -535,7 +450,6 @@ function createSellInstruction(
   const tokenAmountBytes = tokenAmount.toArrayLike(Buffer, 'le', 8);
   const minSolBytes = minSol.toArrayLike(Buffer, 'le', 8);
   const data = Buffer.concat([discriminator, tokenAmountBytes, minSolBytes]);
-
   return new TransactionInstruction({
     keys: [
       { pubkey: seller, isSigner: true, isWritable: true },
@@ -550,7 +464,6 @@ function createSellInstruction(
     data,
   });
 }
-
 function deserializeBondingCurve(data: Buffer): {
   token_mint: PublicKey;
   sol_vault: PublicKey;
@@ -568,7 +481,6 @@ function deserializeBondingCurve(data: Buffer): {
   const base_price = new BN(data.slice(112, 120), 'le');
   const engagement_multiplier = new BN(data.slice(120, 128), 'le');
   const bump = data[128];
-
   return {
     token_mint,
     sol_vault,
@@ -579,7 +491,6 @@ function deserializeBondingCurve(data: Buffer): {
     bump,
   };
 }
-
 async function recordTransaction(
   signature: string,
   wallet: string,
@@ -605,4 +516,3 @@ async function recordTransaction(
     console.error('Failed to record transaction:', error);
   }
 }
-

@@ -2,7 +2,6 @@
 import { useEffect } from "react";
 import { motion, stagger, useAnimate } from "motion/react";
 import { cn } from "@/lib/utils";
-
 export const TextGenerateEffect = ({
   words,
   className,
@@ -31,7 +30,6 @@ export const TextGenerateEffect = ({
       );
     }
   }, [animate, duration, filter]);
-
   const renderWords = () => {
     return (
       <motion.div ref={scope}>
@@ -51,7 +49,6 @@ export const TextGenerateEffect = ({
       </motion.div>
     );
   };
-
   return (
     <div className={cn("font-bold", className)}>
       <div className="mt-4">
@@ -62,4 +59,3 @@ export const TextGenerateEffect = ({
     </div>
   );
 };
-

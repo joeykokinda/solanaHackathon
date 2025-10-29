@@ -1,8 +1,6 @@
 'use client';
-
 import Link from 'next/link';
 import { Twitter, Github, MessageCircle } from 'lucide-react';
-
 export default function Footer() {
   return (
     <footer style={{
@@ -25,7 +23,6 @@ export default function Footer() {
               Invest in creators before they blow up
             </p>
           </div>
-
           <div>
             <h4 style={{ fontWeight: 600, marginBottom: '1rem', color: 'var(--white)' }}>
               Product
@@ -42,7 +39,6 @@ export default function Footer() {
               </Link>
             </div>
           </div>
-
           <div>
             <h4 style={{ fontWeight: 600, marginBottom: '1rem', color: 'var(--white)' }}>
               Company
@@ -53,7 +49,6 @@ export default function Footer() {
               <a href="#" style={{ color: 'var(--gray)', fontSize: '0.875rem' }}>Docs</a>
             </div>
           </div>
-
           <div>
             <h4 style={{ fontWeight: 600, marginBottom: '1rem', color: 'var(--white)' }}>
               Social
@@ -71,7 +66,6 @@ export default function Footer() {
             </div>
           </div>
         </div>
-
         <div style={{ 
           paddingTop: '2rem', 
           borderTop: '1px solid var(--border)',

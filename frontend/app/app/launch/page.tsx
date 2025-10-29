@@ -1,12 +1,10 @@
 'use client';
-
 import { useState } from 'react';
 import { API_URL } from '@/lib/config';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Youtube, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { launchCreatorToken } from '@/lib/launchToken';
 import Link from 'next/link';
-
 export default function LaunchToken() {
   const wallet = useWallet();
   const [step, setStep] = useState(1);
@@ -14,31 +12,25 @@ export default function LaunchToken() {
   const [error, setError] = useState<string | null>(null);
   const [channelData, setChannelData] = useState<any>(null);
   const [launchResult, setLaunchResult] = useState<any>(null);
-
   const handleConnectYouTube = async () => {
     if (!wallet.connected || !wallet.publicKey) {
       setError('Please connect your Solana wallet first');
       return;
     }
-
     setLoading(true);
     setError(null);
-
     try {
       const response = await fetch(`${API_URL}/api/launch/auth-url`);
       const data = await response.json();
-      
       const width = 600;
       const height = 700;
       const left = window.screen.width / 2 - width / 2;
       const top = window.screen.height / 2 - height / 2;
-      
       const authWindow = window.open(
         data.authUrl,
         'YouTube Authorization',
         `width=${width},height=${height},left=${left},top=${top}`
       );
-
       const checkWindow = setInterval(() => {
         try {
           if (authWindow?.closed) {
@@ -49,12 +41,10 @@ export default function LaunchToken() {
         } catch (e) {
         }
       }, 1000);
-
       window.addEventListener('message', async (event) => {
         if (event.data.type === 'youtube-auth-code') {
           clearInterval(checkWindow);
           authWindow?.close();
-
           try {
             const verifyResponse = await fetch(`${API_URL}/api/launch/verify-channel`, {
               method: 'POST',
@@ -64,14 +54,12 @@ export default function LaunchToken() {
                 wallet: wallet.publicKey!.toString()
               })
             });
-
             if (!verifyResponse.ok) {
               const errorData = await verifyResponse.json();
               throw new Error(errorData.error || 'Failed to verify channel');
             }
-
             const channelInfo = await verifyResponse.json();
-            setError(null); // Clear any previous errors
+            setError(null); 
             setChannelData(channelInfo);
             setStep(2);
           } catch (err: any) {
@@ -81,21 +69,17 @@ export default function LaunchToken() {
           }
         }
       });
-
     } catch (err: any) {
       setError(err.message || 'Failed to start YouTube authorization');
       setLoading(false);
     }
   };
-
   const handleLaunchToken = async () => {
     if (!wallet.connected || !channelData) {
       return;
     }
-
     setLoading(true);
     setError(null);
-
     try {
       const result = await launchCreatorToken({
         wallet,
@@ -108,7 +92,6 @@ export default function LaunchToken() {
           videoCount: channelData.videoCount
         }
       });
-
       setLaunchResult(result);
       setStep(3);
     } catch (err: any) {
@@ -118,7 +101,6 @@ export default function LaunchToken() {
       setLoading(false);
     }
   };
-
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1rem' }}>
       <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
@@ -127,7 +109,6 @@ export default function LaunchToken() {
           Turn your YouTube channel into a tradeable asset on Solana
         </p>
       </div>
-
       <div style={{ 
         display: 'flex', 
         justifyContent: 'center',
@@ -162,7 +143,6 @@ export default function LaunchToken() {
           </div>
         ))}
       </div>
-
       {error && (
         <div style={{ 
           padding: '1rem', 
@@ -175,7 +155,6 @@ export default function LaunchToken() {
           {error}
         </div>
       )}
-
       {step === 1 && (
         <div className="card-no-hover" style={{ padding: '2.5rem 2rem', textAlign: 'center' }}>
           <Youtube size={56} style={{ color: 'var(--white)', margin: '0 auto 1.25rem', display: 'block' }} />
@@ -183,7 +162,6 @@ export default function LaunchToken() {
           <p style={{ color: 'var(--gray)', marginBottom: '2rem', lineHeight: 1.6 }}>
             Connect your YouTube account to verify ownership and import your channel data
           </p>
-
           <button 
             className="btn-primary" 
             style={{ padding: '0.875rem 2rem', fontSize: '1rem', marginBottom: '2rem' }}
@@ -201,7 +179,6 @@ export default function LaunchToken() {
               'Connect with YouTube'
             )}
           </button>
-
           <div style={{ 
             padding: '1.25rem',
             border: '1px solid rgba(59, 130, 246, 0.3)',
@@ -210,7 +187,7 @@ export default function LaunchToken() {
             background: 'rgba(59, 130, 246, 0.05)'
           }}>
             <h4 style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--primary)' }}>
-              🎉 Hackathon Demo Mode
+               Hackathon Demo Mode
             </h4>
             <p style={{ 
               color: 'var(--gray)',
@@ -223,11 +200,9 @@ export default function LaunchToken() {
           </div>
         </div>
       )}
-
       {step === 2 && channelData && (
         <div className="card-no-hover" style={{ padding: '2.5rem 2rem' }}>
           <h2 style={{ marginBottom: '1.5rem', textAlign: 'center', fontSize: '1.5rem' }}>Step 2: Confirm Your Details</h2>
-
           <div style={{ 
             display: 'flex', 
             alignItems: 'center', 
@@ -252,7 +227,6 @@ export default function LaunchToken() {
             </div>
             <CheckCircle size={24} style={{ color: 'var(--green)' }} />
           </div>
-
           <div style={{ 
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
@@ -276,7 +250,6 @@ export default function LaunchToken() {
               </p>
             </div>
           </div>
-
           <div style={{ 
             padding: '1.25rem',
             border: '1px solid var(--border)',
@@ -301,7 +274,6 @@ export default function LaunchToken() {
               </div>
             </div>
           </div>
-
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <button 
               className="btn"
@@ -329,7 +301,6 @@ export default function LaunchToken() {
           </div>
         </div>
       )}
-
       {step === 3 && launchResult && (
         <div className="card-no-hover" style={{ padding: '2.5rem 2rem', textAlign: 'center' }}>
           <CheckCircle size={56} style={{ color: 'var(--green)', margin: '0 auto 1.25rem', display: 'block' }} />
@@ -337,7 +308,6 @@ export default function LaunchToken() {
           <p style={{ color: 'var(--gray)', marginBottom: '2rem', lineHeight: 1.6 }}>
             Your token is now live and tradeable on YouVest
           </p>
-
           <div className="card-no-hover" style={{ padding: '1.25rem', marginBottom: '2rem', textAlign: 'left' }}>
             <p style={{ fontSize: '0.875rem', color: 'var(--gray)', marginBottom: '0.5rem' }}>
               Token Address
@@ -351,7 +321,6 @@ export default function LaunchToken() {
               {launchResult.tokenMint}
             </p>
           </div>
-
           <div className="card-no-hover" style={{ padding: '1.25rem', marginBottom: '2rem', textAlign: 'left' }}>
             <p style={{ fontSize: '0.875rem', color: 'var(--gray)', marginBottom: '0.5rem' }}>
               Transaction
@@ -370,7 +339,6 @@ export default function LaunchToken() {
               {launchResult.signature}
             </a>
           </div>
-
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <Link href="/app">
               <button className="btn-primary" style={{ padding: '0.875rem 1.75rem' }}>
@@ -383,7 +351,6 @@ export default function LaunchToken() {
           </div>
         </div>
       )}
-
       <div style={{ 
         marginTop: '1.5rem',
         padding: '1rem',

@@ -2,7 +2,6 @@ const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const router = express.Router();
 const prisma = new PrismaClient();
-
 const MOCK_CREATORS = [
   {
     id: 'mock-1',
@@ -75,11 +74,9 @@ const MOCK_CREATORS = [
     launchDate: new Date('2025-10-21')
   }
 ];
-
 router.get('/', async (req, res) => {
   try {
     const { limit = 20, offset = 0, sortBy = 'launchDate' } = req.query;
-    
     const creators = await prisma.creator.findMany({
       where: { status: 'active' },
       include: {
@@ -92,44 +89,33 @@ router.get('/', async (req, res) => {
       skip: parseInt(offset),
       orderBy: { launchDate: 'desc' }
     });
-
     const creatorsWithMetrics = await Promise.all(creators.map(async creator => {
       const latestMetrics = creator.metricsHistory[0] || {};
-      
       const transactions = await prisma.transaction.findMany({
         where: { tokenAddress: creator.tokenAddress },
         orderBy: { timestamp: 'desc' },
         take: 10
       });
-
       const tokensBought = transactions.reduce((sum, tx) => {
         if (tx.type === 'buy') return sum + Number(tx.tokenAmount);
         if (tx.type === 'sell') return sum - Number(tx.tokenAmount);
         return sum;
       }, 0);
-
       const BASE_PRICE_LAMPORTS = 1000;
       const LAMPORTS_PER_SOL = 1_000_000_000;
-      
       const supplyInTokens = tokensBought / LAMPORTS_PER_SOL;
       const curve = (supplyInTokens * supplyInTokens) / 10_000;
       const priceInLamports = BASE_PRICE_LAMPORTS + curve;
       const currentPrice = priceInLamports / LAMPORTS_PER_SOL;
-      
       const totalSupply = 100_000_000;
-
       const now = new Date();
       const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
       const txs24h = transactions.filter(tx => tx.timestamp >= oneDayAgo);
-      
       const volume24h = txs24h.reduce((sum, tx) => sum + Number(tx.solAmount) / 1e9, 0);
-      
       const priceYesterday = transactions.length > 0 ? Number(transactions[transactions.length - 1].pricePerToken) : currentPrice;
       const priceChange24h = priceYesterday > 0 ? ((currentPrice - priceYesterday) / priceYesterday) * 100 : 0;
-
       const uniqueWallets = new Set(transactions.map(tx => tx.buyerWallet));
       const holdersCount = uniqueWallets.size;
-
       return {
         id: creator.id,
         channelName: creator.channelName,
@@ -148,13 +134,10 @@ router.get('/', async (req, res) => {
         youtubeChannelId: creator.youtubeChannelId
       };
     }));
-
     if (creatorsWithMetrics.length === 0) {
       creatorsWithMetrics = MOCK_CREATORS;
     }
-
     const total = creatorsWithMetrics.length;
-
     res.json({
       creators: creatorsWithMetrics,
       total
@@ -164,7 +147,6 @@ router.get('/', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch creators' });
   }
 });
-
 router.get('/:id', async (req, res) => {
   try {
     const creator = await prisma.creator.findUnique({
@@ -175,47 +157,35 @@ router.get('/:id', async (req, res) => {
         }
       }
     });
-
     if (!creator) {
       return res.status(404).json({ error: 'Creator not found' });
     }
-
     const latestMetrics = creator.metricsHistory[creator.metricsHistory.length - 1] || {};
-
     const transactions = await prisma.transaction.findMany({
       where: { tokenAddress: creator.tokenAddress },
       orderBy: { timestamp: 'desc' },
       take: 20
     });
-
     const tokensBought = transactions.reduce((sum, tx) => {
       if (tx.type === 'buy') return sum + Number(tx.tokenAmount);
       if (tx.type === 'sell') return sum - Number(tx.tokenAmount);
       return sum;
     }, 0);
-
     const BASE_PRICE_LAMPORTS = 1000;
     const LAMPORTS_PER_SOL = 1_000_000_000;
-    
     const supplyInTokens = tokensBought / LAMPORTS_PER_SOL;
     const curve = (supplyInTokens * supplyInTokens) / 10_000;
     const priceInLamports = BASE_PRICE_LAMPORTS + curve;
     const currentPrice = priceInLamports / LAMPORTS_PER_SOL;
-    
     const totalSupply = 100_000_000;
-
     const now = new Date();
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     const txs24h = transactions.filter(tx => tx.timestamp >= oneDayAgo);
-    
     const volume24h = txs24h.reduce((sum, tx) => sum + Number(tx.solAmount) / 1e9, 0);
-    
     const priceYesterday = transactions.length > 0 ? Number(transactions[transactions.length - 1].pricePerToken) : currentPrice;
     const priceChange24h = priceYesterday > 0 ? ((currentPrice - priceYesterday) / priceYesterday) * 100 : 0;
-
     const uniqueWallets = new Set(transactions.map(tx => tx.buyerWallet));
     const holders = uniqueWallets.size;
-
     const recentTrades = transactions.length > 0 ? transactions.slice(0, 5).map(tx => ({
       type: tx.type,
       amount: Number(tx.tokenAmount) / 1e9,
@@ -223,12 +193,10 @@ router.get('/:id', async (req, res) => {
       time: formatTimeAgo(tx.timestamp),
       wallet: `${tx.buyerWallet.slice(0, 4)}...${tx.buyerWallet.slice(-4)}`
     })) : [];
-
     const metricsHistorySerialized = creator.metricsHistory.map(m => ({
       ...m,
       totalViews: Number(m.totalViews)
     }));
-
     res.json({
       id: creator.id,
       channelName: creator.channelName,
@@ -257,7 +225,6 @@ router.get('/:id', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch creator', details: error.message });
   }
 });
-
 function formatTimeAgo(date) {
   const seconds = Math.floor((new Date() - date) / 1000);
   if (seconds < 60) return `${seconds}s ago`;
@@ -268,28 +235,22 @@ function formatTimeAgo(date) {
   const days = Math.floor(hours / 24);
   return `${days}d ago`;
 }
-
 router.post('/launch', async (req, res) => {
   try {
     const { wallet, youtubeChannelId, channelName, channelAvatar, subscribers, avgViews, tokenAddress } = req.body;
-
     if (!wallet || !youtubeChannelId || !tokenAddress) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
-
     let user = await prisma.user.findUnique({ where: { wallet } });
     if (!user) {
       user = await prisma.user.create({ data: { wallet } });
     }
-
     const existingCreator = await prisma.creator.findUnique({
       where: { youtubeChannelId }
     });
-
     if (existingCreator) {
       return res.status(400).json({ error: 'Creator already exists' });
     }
-
     const creator = await prisma.creator.create({
       data: {
         userId: user.id,
@@ -302,7 +263,6 @@ router.post('/launch', async (req, res) => {
         status: 'active'
       }
     });
-
     await prisma.metricsHistory.create({
       data: {
         creatorId: creator.id,
@@ -314,7 +274,6 @@ router.post('/launch', async (req, res) => {
         uploadFrequency: 0
       }
     });
-
     res.json({
       id: creator.id,
       tokenAddress: creator.tokenAddress,
@@ -325,6 +284,4 @@ router.post('/launch', async (req, res) => {
     res.status(500).json({ error: 'Failed to launch creator token' });
   }
 });
-
 module.exports = router;
-

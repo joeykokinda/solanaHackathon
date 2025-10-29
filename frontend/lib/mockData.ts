@@ -116,10 +116,8 @@ export const MOCK_CREATORS = [
     recentTrades: []
   }
 ];
-
 export const PLATFORM_STATS = {
   totalCreators: 127,
   totalVolume: 45200,
   totalInvestors: 2341
 };
-

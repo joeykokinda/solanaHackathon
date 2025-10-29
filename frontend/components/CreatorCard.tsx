@@ -1,8 +1,6 @@
 'use client';
-
 import Link from 'next/link';
 import { TrendingUp, TrendingDown, Activity, Users } from 'lucide-react';
-
 interface CreatorCardProps {
   creator: {
     id: string;
@@ -19,14 +17,12 @@ interface CreatorCardProps {
     tokenAddress: string;
   };
 }
-
 const getProxiedImageUrl = (url?: string): string | undefined => {
   if (!url || !url.startsWith('https://yt3.ggpht.com/')) {
     return url;
   }
   return `http://localhost:3001/api/proxy-image?url=${encodeURIComponent(url)}`;
 };
-
 const getCreatorColor = (channelName: string): string => {
   const colorMap: { [key: string]: string } = {
     'fireship': '#FF6B35',
@@ -50,7 +46,6 @@ const getCreatorColor = (channelName: string): string => {
     'solana': '#14F195',
     'web3': '#9945FF'
   };
-
   const lowerName = channelName.toLowerCase();
   for (const [key, color] of Object.entries(colorMap)) {
     if (lowerName.includes(key)) {
@@ -59,11 +54,9 @@ const getCreatorColor = (channelName: string): string => {
   }
   return '#2a2a2a';
 };
-
 export default function CreatorCard({ creator }: CreatorCardProps) {
   const isPositive = creator.priceChange24h >= 0;
   const brandColor = getCreatorColor(creator.channelName);
-  
   return (
     <Link 
       href={`/app/creator/${creator.id}`}
@@ -118,7 +111,6 @@ export default function CreatorCard({ creator }: CreatorCardProps) {
             </div>
           )}
         </div>
-
         <div style={{ padding: '1.5rem', paddingTop: '2.5rem' }}>
           <h3 style={{ fontSize: '1rem', fontWeight: 500, marginBottom: '0.25rem', color: 'var(--white)' }}>
             {creator.channelName}
@@ -143,7 +135,6 @@ export default function CreatorCard({ creator }: CreatorCardProps) {
               {isPositive ? '+' : ''}{creator.priceChange24h.toFixed(1)}%
             </span>
           </div>
-
           <div style={{ 
             display: 'grid',
             gridTemplateColumns: 'repeat(2, 1fr)',
@@ -167,7 +158,6 @@ export default function CreatorCard({ creator }: CreatorCardProps) {
               </div>
             </div>
           </div>
-
           <div style={{ marginBottom: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
             <div style={{ fontSize: '0.75rem', color: 'var(--gray)', marginBottom: '0.25rem' }}>
               Token Price
@@ -186,7 +176,6 @@ export default function CreatorCard({ creator }: CreatorCardProps) {
               {isPositive ? '+' : ''}{creator.priceChange24h.toFixed(1)}% 24h
             </div>
           </div>
-
           <div style={{ 
             display: 'flex', 
             justifyContent: 'space-between',
@@ -205,7 +194,6 @@ export default function CreatorCard({ creator }: CreatorCardProps) {
               {creator.holders || 0}
             </div>
           </div>
-
           <button className="btn" style={{ width: '100%', fontSize: '0.875rem', padding: '0.625rem' }}>
             View Profile
           </button>

@@ -1,5 +1,4 @@
 'use client';
-
 import { useParams, useRouter } from 'next/navigation';
 import { TrendingUp, TrendingDown, Users, Activity, Eye, Video, Play, MessageCircle, ExternalLink } from 'lucide-react';
 import { useState, useEffect } from 'react';
@@ -7,14 +6,12 @@ import Link from 'next/link';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { buyTokens, sellTokens, getTokensFromSolBuy, getTokensFromSolSell, getUserTokenBalance, getActualSellReturn } from '@/lib/solana';
 import { API_URL } from '@/lib/config';
-
 const getProxiedImageUrl = (url?: string): string | undefined => {
   if (!url || !url.startsWith('https://yt3.ggpht.com/')) {
     return url;
   }
   return `${API_URL}/api/proxy-image?url=${encodeURIComponent(url)}`;
 };
-
 export default function CreatorProfile() {
   const params = useParams();
   const router = useRouter();
@@ -28,7 +25,6 @@ export default function CreatorProfile() {
   const [success, setSuccess] = useState<string | null>(null);
   const [estimatedTokens, setEstimatedTokens] = useState<number>(0);
   const [userBalance, setUserBalance] = useState<number>(0);
-
   const fetchCreator = async () => {
     try {
       const response = await fetch(`${API_URL}/api/creators/${params.id}`);
@@ -45,7 +41,6 @@ export default function CreatorProfile() {
       setLoading(false);
     }
   };
-
   const fetchUserBalance = async () => {
     if (!wallet.publicKey || !creator) return;
     try {
@@ -56,17 +51,14 @@ export default function CreatorProfile() {
       setUserBalance(0);
     }
   };
-
   useEffect(() => {
     fetchCreator();
   }, [params.id, router]);
-
   useEffect(() => {
     if (creator && wallet.publicKey) {
       fetchUserBalance();
     }
   }, [creator, wallet.publicKey]);
-
   useEffect(() => {
     const timeoutId = setTimeout(async () => {
       if (!amount || !creator) {
@@ -78,7 +70,6 @@ export default function CreatorProfile() {
         setEstimatedTokens(0);
         return;
       }
-      
       try {
         if (activeTab === 'buy') {
           const tokens = await getTokensFromSolBuy(creator.tokenAddress, solAmount);
@@ -92,23 +83,17 @@ export default function CreatorProfile() {
         setEstimatedTokens(Math.floor(solAmount / creator.priceSOL));
       }
     }, 300);
-
     return () => clearTimeout(timeoutId);
   }, [amount, creator, activeTab]);
-
   if (loading) {
     return <div className="p-8 text-center">Loading...</div>;
   }
-
   if (!creator) {
     return null;
   }
-  
   const isPositive = creator.priceChange24h >= 0;
-
   const handleMax = async () => {
     if (!wallet.publicKey || !creator || userBalance <= 0) return;
-    
     try {
       const solValue = await getActualSellReturn(creator.tokenAddress, userBalance);
       setAmount(solValue.toFixed(6));
@@ -117,56 +102,46 @@ export default function CreatorProfile() {
       setAmount((userBalance * creator.priceSOL).toFixed(6));
     }
   };
-
   const handleTrade = async () => {
     if (!wallet.connected || !wallet.publicKey) {
       setError('Please connect your wallet first');
       return;
     }
-
     if (!amount || parseFloat(amount) <= 0) {
       setError('Please enter a valid SOL amount');
       return;
     }
-
     if (activeTab === 'buy' && (!estimatedTokens || estimatedTokens < 0.001)) {
       setError('Amount too small. Try a larger amount.');
       return;
     }
-
     if (activeTab === 'sell' && (!estimatedTokens || estimatedTokens <= 0)) {
       setError('No tokens to sell or amount too small');
       return;
     }
-
     setProcessing(true);
     setError(null);
     setSuccess(null);
-
     try {
       const solAmount = parseFloat(amount);
       let signature: string;
-      
       if (activeTab === 'buy') {
         signature = await buyTokens(wallet, creator.tokenAddress, estimatedTokens, 0);
-        setSuccess(`✅ Bought ${estimatedTokens.toLocaleString(undefined, { maximumFractionDigits: 2 })} tokens for ${solAmount} SOL! Tx: ${signature.slice(0, 8)}...`);
+        setSuccess(` Bought ${estimatedTokens.toLocaleString(undefined, { maximumFractionDigits: 2 })} tokens for ${solAmount} SOL! Tx: ${signature.slice(0, 8)}...`);
       } else {
         signature = await sellTokens(wallet, creator.tokenAddress, estimatedTokens, 0);
-        setSuccess(`✅ Sold ${estimatedTokens.toLocaleString(undefined, { maximumFractionDigits: 2 })} tokens for ${solAmount} SOL! Tx: ${signature.slice(0, 8)}...`);
+        setSuccess(` Sold ${estimatedTokens.toLocaleString(undefined, { maximumFractionDigits: 2 })} tokens for ${solAmount} SOL! Tx: ${signature.slice(0, 8)}...`);
       }
-
       setAmount('');
       setEstimatedTokens(0);
-      
       setTimeout(() => {
         fetchCreator();
         fetchUserBalance();
       }, 2000);
-
     } catch (err: any) {
       console.error('Transaction error:', err);
       if (err.message && err.message.includes('already been processed')) {
-        setSuccess(`✅ Transaction completed! Check your wallet.`);
+        setSuccess(` Transaction completed! Check your wallet.`);
         setTimeout(() => {
           fetchCreator();
           fetchUserBalance();
@@ -178,7 +153,6 @@ export default function CreatorProfile() {
       setProcessing(false);
     }
   };
-
   return (
     <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '2.5rem 1.5rem' }}>
       <div className="card-no-hover" style={{ 
@@ -234,7 +208,6 @@ export default function CreatorProfile() {
           </div>
         </div>
       </div>
-
       <div className="grid lg:grid-cols-[2fr_1fr] gap-6">
         <div>
           <div className="card-no-hover" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
@@ -264,7 +237,6 @@ export default function CreatorProfile() {
                 </p>
               </div>
             </div>
-
             <div style={{ 
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
@@ -298,7 +270,6 @@ export default function CreatorProfile() {
               </div>
             </div>
           </div>
-
           <div className="card-no-hover" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
             <h3 style={{ marginBottom: '1.5rem' }}>Channel Metrics</h3>
             <div style={{ 
@@ -326,7 +297,6 @@ export default function CreatorProfile() {
               </div>
             </div>
           </div>
-
           {creator.recentVideos && creator.recentVideos.length > 0 && (
             <div className="card-no-hover" style={{ padding: '1.5rem' }}>
               <h3 style={{ marginBottom: '1.5rem' }}>Recent Videos</h3>
@@ -364,7 +334,6 @@ export default function CreatorProfile() {
             </div>
           )}
         </div>
-
         <div style={{ position: 'sticky', top: '100px', alignSelf: 'flex-start' }}>
           <div className="card-no-hover" style={{ padding: '1.5rem', marginBottom: '1rem' }}>
             <div style={{ 
@@ -404,7 +373,6 @@ export default function CreatorProfile() {
                 Sell
               </button>
             </div>
-
             <div style={{ marginBottom: '1.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                 <label style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
@@ -446,7 +414,6 @@ export default function CreatorProfile() {
                 style={{ fontSize: '1.125rem', fontWeight: 600 }}
               />
             </div>
-
             {amount && parseFloat(amount) > 0 && (
               <div className="card-no-hover" style={{ padding: '1rem', marginBottom: '1.5rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
@@ -473,7 +440,6 @@ export default function CreatorProfile() {
                 </div>
               </div>
             )}
-
             {error && (
               <div style={{ 
                 padding: '1rem', 
@@ -486,7 +452,6 @@ export default function CreatorProfile() {
                 {error}
               </div>
             )}
-
             {success && (
               <div style={{ 
                 padding: '1rem', 
@@ -499,7 +464,6 @@ export default function CreatorProfile() {
                 {success}
               </div>
             )}
-
             <button 
               style={{ 
                 width: '100%', 
@@ -521,7 +485,6 @@ export default function CreatorProfile() {
             >
               {processing ? 'Processing...' : !wallet.connected ? 'Connect Wallet' : `${activeTab === 'buy' ? 'Buy' : 'Sell'} ${creator.channelName.split(' ')[0]} Tokens`}
             </button>
-
             <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
               <h4 style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '1rem' }}>Market Stats</h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -540,7 +503,6 @@ export default function CreatorProfile() {
               </div>
             </div>
           </div>
-
           {creator.recentTrades && creator.recentTrades.length > 0 && (
             <div className="card-no-hover" style={{ padding: '1.5rem' }}>
               <h4 style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '1rem' }}>Recent Trades</h4>
@@ -575,7 +537,6 @@ export default function CreatorProfile() {
               </div>
             </div>
           )}
-
           <div className="card-no-hover" style={{ padding: '1rem', marginTop: '1rem' }}>
             <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
               Token Address

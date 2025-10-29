@@ -1,22 +1,18 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import { API_URL } from '@/lib/config';
 import CreatorCard from '@/components/CreatorCard';
 import SkeletonCard from '@/components/SkeletonCard';
 import { Search } from 'lucide-react';
-
 export default function Markets() {
   const [loading, setLoading] = useState(true);
   const [creators, setCreators] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterValue, setFilterValue] = useState('all');
   const [sortValue, setSortValue] = useState('trending');
-
   useEffect(() => {
     fetchCreators();
   }, []);
-
   const fetchCreators = async () => {
     try {
       setLoading(true);
@@ -32,15 +28,12 @@ export default function Markets() {
       setLoading(false);
     }
   };
-
   const filteredCreators = creators.filter(creator => 
     creator.channelName.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
   return (
     <div style={{ padding: '2rem', maxWidth: '1600px', margin: '0 auto' }}>
       <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '2rem' }}>Markets</h1>
-      
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
         <div style={{ flex: '1', minWidth: '300px', maxWidth: '600px', position: 'relative' }}>
           <Search 
@@ -63,7 +56,6 @@ export default function Markets() {
             style={{ paddingLeft: '3rem', width: '100%' }}
           />
         </div>
-
         <select 
           value={filterValue}
           onChange={(e) => setFilterValue(e.target.value)}
@@ -74,7 +66,6 @@ export default function Markets() {
           <option value="5k-10k">5k-10k</option>
           <option value="10k+">10k+</option>
         </select>
-
         <select 
           value={sortValue}
           onChange={(e) => setSortValue(e.target.value)}
@@ -86,12 +77,10 @@ export default function Markets() {
           <option value="price">Price</option>
         </select>
       </div>
-
       <div style={{ marginBottom: '1.5rem' }}>
         <h2 style={{ fontSize: '1.75rem', fontWeight: 600, marginBottom: '0.25rem' }}>All Creators</h2>
         <p style={{ fontSize: '0.875rem', color: 'var(--gray)' }}>{filteredCreators.length} creators</p>
       </div>
-
       {loading ? (
         <div style={{ 
           display: 'grid', 
