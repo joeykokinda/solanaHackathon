@@ -223,8 +223,6 @@ npm run prisma:migrate
 - Cache metrics for 1 hour
 - Request quota increase
 
-## 📧 Contact
-
 Built for Cypherpunk Hackathon 2025 by Colosseum
 
 ---

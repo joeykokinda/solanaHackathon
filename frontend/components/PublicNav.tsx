@@ -71,6 +71,9 @@ export default function PublicNav() {
               <a href="#featured" className="text-gray-300 hover:text-white transition-colors">
                 Creators
               </a>
+              <a href="#for-creators" className="text-gray-300 hover:text-white transition-colors">
+                For Creators
+              </a>
               <a href="#faq" className="text-gray-300 hover:text-white transition-colors">
                 FAQ
               </a>

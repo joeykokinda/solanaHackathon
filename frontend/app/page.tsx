@@ -273,13 +273,78 @@ export default function LandingPage() {
               </div>
 
               <div className="card-no-hover" style={{ padding: '2rem' }}>
-                <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>💎</div>
+                <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <svg width="32" height="32" viewBox="0 0 397.7 311.7" style={{ display: 'block' }}>
+                    <linearGradient id="solana-gradient" x2="0.35" y2="1">
+                      <stop offset="0%" stopColor="#00FFA3" />
+                      <stop offset="50%" stopColor="#DC1FFF" />
+                      <stop offset="100%" stopColor="#00FFA3" />
+                    </linearGradient>
+                    <path fill="url(#solana-gradient)" d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7zm0-64.6c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7zM6.5 3.8h317.4c3.5 0 6.8 1.4 9.2 3.8l62.7 62.7c4.1 4.1 1.2 11.1-4.6 11.1H73.8c-3.5 0-6.8-1.4-9.2-3.8L1.9 14.9C-2.2 10.8.7 3.8 6.5 3.8z"/>
+                  </svg>
+                </div>
                 <h3 style={{ marginBottom: '0.75rem', fontSize: '1.25rem' }}>Built on Solana</h3>
                 <p style={{ color: 'var(--gray-light)', lineHeight: 1.6 }}>
-                  Fast transactions, low fees (~0.000005 SOL). Your tokens, your wallet, your control.
+                  Fast transactions, low fees (~$0.00025). Your tokens, your wallet, your control.
                 </p>
               </div>
             </div>
+          </section>
+
+          <section id="for-creators" style={{ 
+            maxWidth: '1000px',
+            margin: '0 auto',
+            padding: '8rem 2rem',
+            textAlign: 'center'
+          }}>
+            <h2 style={{ fontSize: '2.5rem', marginBottom: '1.5rem' }}>
+              Are You a Creator?
+            </h2>
+            
+            <p style={{ 
+              fontSize: '1.25rem', 
+              color: 'var(--gray-light)', 
+              marginBottom: '4rem',
+              maxWidth: '700px',
+              margin: '0 auto 4rem'
+            }}>
+              Launch your own token in minutes. Connect your YouTube channel and let your fans invest in your growth.
+            </p>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gap: '2rem',
+              marginBottom: '3rem'
+            }}>
+              <div className="card-no-hover" style={{ padding: '2rem', textAlign: 'center' }}>
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎥</div>
+                <h3 style={{ marginBottom: '0.75rem', fontSize: '1.125rem' }}>Connect YouTube</h3>
+                <p style={{ color: 'var(--gray)', lineHeight: 1.6, fontSize: '0.95rem' }}>
+                  Verify ownership of your channel with one click
+                </p>
+              </div>
+
+              <div className="card-no-hover" style={{ padding: '2rem', textAlign: 'center' }}>
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🪙</div>
+                <h3 style={{ marginBottom: '0.75rem', fontSize: '1.125rem' }}>Launch Token</h3>
+                <p style={{ color: 'var(--gray)', lineHeight: 1.6, fontSize: '0.95rem' }}>
+                  Create a real token on Solana with a bonding curve
+                </p>
+              </div>
+
+              <div className="card-no-hover" style={{ padding: '2rem', textAlign: 'center' }}>
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📊</div>
+                <h3 style={{ marginBottom: '0.75rem', fontSize: '1.125rem' }}>Grow Together</h3>
+                <p style={{ color: 'var(--gray)', lineHeight: 1.6, fontSize: '0.95rem' }}>
+                  Your fans profit when you grow. Built-in liquidity
+                </p>
+              </div>
+            </div>
+
+            <a href="/app/launch" className="btn-primary" style={{ fontSize: '1.125rem', padding: '1rem 2rem' }}>
+              Launch Your Token →
+            </a>
           </section>
 
           <section id="faq" style={{ 

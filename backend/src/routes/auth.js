@@ -2,10 +2,12 @@ const express = require('express');
 const { google } = require('googleapis');
 const router = express.Router();
 
+const REDIRECT_URI = process.env.YOUTUBE_REDIRECT_URI || 'http://localhost:3000/app/launch/callback';
+
 const oauth2Client = new google.auth.OAuth2(
   process.env.YOUTUBE_CLIENT_ID,
   process.env.YOUTUBE_CLIENT_SECRET,
-  'http://localhost:3000/app/launch/callback'
+  REDIRECT_URI
 );
 
 router.post('/youtube', (req, res) => {
