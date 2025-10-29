@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { buyTokens, sellTokens, getTokensFromSolBuy, getTokensFromSolSell, getUserTokenBalance, getActualSellReturn } from '@/lib/solana';
+import { API_URL } from '@/lib/config';
 
 const getProxiedImageUrl = (url?: string): string | undefined => {
   if (!url || !url.startsWith('https://yt3.ggpht.com/')) {

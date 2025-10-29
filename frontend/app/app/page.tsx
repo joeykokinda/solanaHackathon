@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { API_URL } from '@/lib/config';
 import CreatorCard from '@/components/CreatorCard';
 import SkeletonCard from '@/components/SkeletonCard';
 import { Search } from 'lucide-react';

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { API_URL } from '@/lib/config';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Youtube, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { launchCreatorToken } from '@/lib/launchToken';
