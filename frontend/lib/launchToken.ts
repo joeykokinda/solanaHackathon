@@ -10,8 +10,8 @@ import {
 } from '@solana/spl-token';
 import { WalletContextState } from '@solana/wallet-adapter-react';
 import { 
-  createCreateMetadataAccountV3Instruction,
-  PROGRAM_ID as TOKEN_METADATA_PROGRAM_ID
+  getCreateMetadataAccountV3InstructionDataSerializer,
+  MPL_TOKEN_METADATA_PROGRAM_ID
 } from '@metaplex-foundation/mpl-token-metadata';
 
 import { SOLANA_RPC, API_URL } from './config';
@@ -122,10 +122,10 @@ export async function launchCreatorToken({ wallet, channelData }: LaunchTokenPar
   const [metadataPDA] = PublicKey.findProgramAddressSync(
     [
       Buffer.from('metadata'),
-      TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+      new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID).toBuffer(),
       mintPubkey.toBuffer(),
     ],
-    TOKEN_METADATA_PROGRAM_ID
+    new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID)
   );
 
   const tokenSymbol = channelData.channelName
@@ -133,32 +133,38 @@ export async function launchCreatorToken({ wallet, channelData }: LaunchTokenPar
     .substring(0, 10)
     .toUpperCase();
 
-  const metadataInstruction = createCreateMetadataAccountV3Instruction(
-    {
-      metadata: metadataPDA,
-      mint: mintPubkey,
-      mintAuthority: wallet.publicKey,
-      payer: wallet.publicKey,
-      updateAuthority: wallet.publicKey,
+  const metadataData = getCreateMetadataAccountV3InstructionDataSerializer().serialize({
+    data: {
+      name: channelData.channelName.substring(0, 32),
+      symbol: tokenSymbol,
+      uri: '',
+      sellerFeeBasisPoints: 0,
+      creators: null,
+      collection: null,
+      uses: null,
     },
-    {
-      createMetadataAccountArgsV3: {
-        data: {
-          name: channelData.channelName.substring(0, 32),
-          symbol: tokenSymbol,
-          uri: '',
-          sellerFeeBasisPoints: 0,
-          creators: null,
-          collection: null,
-          uses: null,
-        },
-        isMutable: true,
-        collectionDetails: null,
-      },
-    }
-  );
+    isMutable: true,
+    collectionDetails: null,
+  });
 
-  transaction.add(metadataInstruction);
+  const { TransactionInstruction } = await import('@solana/web3.js');
+  const SYSVAR_RENT_PUBKEY = new PublicKey('SysvarRent111111111111111111111111111111111');
+  
+  const metadataIx = new TransactionInstruction({
+    keys: [
+      { pubkey: metadataPDA, isSigner: false, isWritable: true },
+      { pubkey: mintPubkey, isSigner: false, isWritable: false },
+      { pubkey: wallet.publicKey, isSigner: false, isWritable: false },
+      { pubkey: wallet.publicKey, isSigner: true, isWritable: true },
+      { pubkey: wallet.publicKey, isSigner: false, isWritable: false },
+      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+      { pubkey: SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false },
+    ],
+    programId: new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID),
+    data: Buffer.from(metadataData),
+  });
+
+  transaction.add(metadataIx);
 
   const initCurveData = Buffer.concat([
     Buffer.from([170, 84, 186, 253, 131, 149, 95, 213])
