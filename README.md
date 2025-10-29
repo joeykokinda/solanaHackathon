@@ -1,6 +1,4 @@
-# YouVest - Invest in Creators BEFORE They Blow Up 🚀
-
-A decentralized platform built on Solana that lets you invest in early-stage YouTubers through creator tokens. Powered by bonding curves for fair price discovery.
+# YouVest - Invest in Creators BEFORE They Blow Up
 
 **Live Demo:** [https://www.youvest.lol/](https://www.youvest.lol/)
 
@@ -10,7 +8,7 @@ A decentralized platform built on Solana that lets you invest in early-stage You
 
 ## What is YouVest?
 
-YouVest is a DeFi platform where you can discover and invest in emerging YouTube creators. Think of it as an early-stage stock market for content creators.
+YouVest is a  platform where you can discover and invest in emerging YouTube creators. Think of it as an early-stage stock market for content creators.
 
 ### The Problem
 - Creators struggle to get funding in their early days
