@@ -107,18 +107,7 @@ export async function launchCreatorToken({ wallet, channelData }: LaunchTokenPar
     )
   );
 
-  transaction.add(
-    createSetAuthorityInstruction(
-      mintPubkey,
-      wallet.publicKey,
-      AuthorityType.MintTokens,
-      bondingCurve,
-      [],
-      TOKEN_PROGRAM_ID
-    )
-  );
-
-  // Add token metadata so it shows up in wallets
+  // Add token metadata BEFORE transferring authority
   const [metadataPDA] = PublicKey.findProgramAddressSync(
     [
       Buffer.from('metadata'),
@@ -165,6 +154,18 @@ export async function launchCreatorToken({ wallet, channelData }: LaunchTokenPar
   });
 
   transaction.add(metadataIx);
+
+  // NOW transfer authority to bonding curve AFTER metadata is created
+  transaction.add(
+    createSetAuthorityInstruction(
+      mintPubkey,
+      wallet.publicKey,
+      AuthorityType.MintTokens,
+      bondingCurve,
+      [],
+      TOKEN_PROGRAM_ID
+    )
+  );
 
   const initCurveData = Buffer.concat([
     Buffer.from([170, 84, 186, 253, 131, 149, 95, 213])
