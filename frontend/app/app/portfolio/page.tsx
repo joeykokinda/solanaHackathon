@@ -65,6 +65,7 @@ export default function Portfolio() {
     
     setLoading(true);
     try {
+      const { getActualSellReturn } = await import('@/lib/solana');
       const creatorsResponse = await fetch(`${API_URL}/api/creators`);
       const creatorsData = await creatorsResponse.json();
       
@@ -72,7 +73,15 @@ export default function Portfolio() {
         try {
           const balance = await getUserTokenBalance(publicKey.toString(), creator.tokenAddress);
           if (balance > 0) {
-            const valueInSOL = balance * creator.priceSOL;
+            // Calculate actual sell value through bonding curve
+            let valueInSOL = 0;
+            try {
+              valueInSOL = await getActualSellReturn(creator.tokenAddress, balance);
+            } catch (e) {
+              // Fallback to simple calculation if bonding curve fails
+              valueInSOL = balance * creator.priceSOL;
+            }
+            
             return {
               creator,
               amount: balance,
