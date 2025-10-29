@@ -50,7 +50,7 @@ export default function Portfolio() {
   const totalReturn = totalInvested > 0 ? (totalPnL / totalInvested) * 100 : 0;
 
   if (!mounted) {
-    return <div className="p-8">Loading...</div>;
+    return <div style={{ padding: '2rem' }}>Loading...</div>;
   }
 
   if (!connected) {
@@ -77,8 +77,8 @@ export default function Portfolio() {
   }
 
   return (
-    <div className="p-8">
-      <h1 className="text-4xl font-bold text-white mb-8">Portfolio</h1>
+    <div style={{ padding: '2rem', maxWidth: '1600px', margin: '0 auto' }}>
+      <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '2rem' }}>Portfolio</h1>
 
       <div style={{ 
         display: 'grid', 

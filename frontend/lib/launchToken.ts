@@ -75,8 +75,42 @@ export async function launchCreatorToken({ wallet, channelData }: LaunchTokenPar
     createInitializeMint2Instruction(
       mintPubkey,
       9,
+      wallet.publicKey,
+      wallet.publicKey,
+      TOKEN_PROGRAM_ID
+    )
+  );
+
+  const { createMintToInstruction, createSetAuthorityInstruction, AuthorityType, createAssociatedTokenAccountInstruction } = await import('@solana/spl-token');
+  const TOTAL_SUPPLY = 1_000_000_000n * 1_000_000_000n;
+  
+  transaction.add(
+    createAssociatedTokenAccountInstruction(
+      wallet.publicKey,
+      tokenVault,
       bondingCurve,
+      mintPubkey
+    )
+  );
+
+  transaction.add(
+    createMintToInstruction(
+      mintPubkey,
+      tokenVault,
+      wallet.publicKey,
+      TOTAL_SUPPLY,
+      [],
+      TOKEN_PROGRAM_ID
+    )
+  );
+
+  transaction.add(
+    createSetAuthorityInstruction(
+      mintPubkey,
+      wallet.publicKey,
+      AuthorityType.MintTokens,
       bondingCurve,
+      [],
       TOKEN_PROGRAM_ID
     )
   );
@@ -91,7 +125,7 @@ export async function launchCreatorToken({ wallet, channelData }: LaunchTokenPar
       { pubkey: bondingCurve, isSigner: false, isWritable: true },
       { pubkey: mintPubkey, isSigner: false, isWritable: false },
       { pubkey: solVault, isSigner: false, isWritable: true },
-      { pubkey: tokenVault, isSigner: false, isWritable: true },
+      { pubkey: tokenVault, isSigner: false, isWritable: false },
       { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
       { pubkey: ASSOCIATED_TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
       { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },

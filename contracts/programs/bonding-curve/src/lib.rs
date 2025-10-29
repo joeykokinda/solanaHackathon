@@ -24,6 +24,21 @@ pub mod bonding_curve {
         curve.base_price = BASE_PRICE;
         curve.engagement_multiplier = SCALE_FACTOR;
         curve.bump = ctx.bumps.bonding_curve;
+        curve.sol_vault_bump = ctx.bumps.sol_vault;
+
+        let rent = Rent::get()?;
+        let rent_lamports = rent.minimum_balance(0);
+        
+        system_program::transfer(
+            CpiContext::new(
+                ctx.accounts.system_program.to_account_info(),
+                system_program::Transfer {
+                    from: ctx.accounts.authority.to_account_info(),
+                    to: ctx.accounts.sol_vault.to_account_info(),
+                },
+            ),
+            rent_lamports,
+        )?;
 
         Ok(())
     }
@@ -82,6 +97,9 @@ pub mod bonding_curve {
 
     pub fn sell_tokens(ctx: Context<SellTokens>, token_amount: u64, min_sol: u64) -> Result<()> {
         let curve = &mut ctx.accounts.bonding_curve;
+        let token_mint_key = curve.token_mint;
+        let bump = curve.bump;
+        let sol_vault_bump = curve.sol_vault_bump;
 
         require!(
             token_amount <= curve.tokens_bought,
@@ -97,6 +115,15 @@ pub mod bonding_curve {
 
         require!(return_amount >= min_sol, ErrorCode::SlippageExceeded);
 
+        let rent = Rent::get()?;
+        let rent_minimum = rent.minimum_balance(0);
+        let sol_vault_balance = ctx.accounts.sol_vault.lamports();
+        
+        require!(
+            sol_vault_balance >= return_amount + rent_minimum,
+            ErrorCode::InsufficientLiquidity
+        );
+
         transfer(
             CpiContext::new(
                 ctx.accounts.token_program.to_account_info(),
@@ -109,12 +136,25 @@ pub mod bonding_curve {
             token_amount,
         )?;
 
-        **ctx
-            .accounts
-            .sol_vault
-            .to_account_info()
-            .try_borrow_mut_lamports()? -= return_amount;
-        **ctx.accounts.seller.try_borrow_mut_lamports()? += return_amount;
+        let bonding_curve_key = curve.key();
+        let sol_vault_seeds = &[
+            b"sol_vault",
+            bonding_curve_key.as_ref(),
+            &[sol_vault_bump],
+        ];
+        let sol_vault_signer_seeds = &[&sol_vault_seeds[..]];
+
+        system_program::transfer(
+            CpiContext::new_with_signer(
+                ctx.accounts.system_program.to_account_info(),
+                system_program::Transfer {
+                    from: ctx.accounts.sol_vault.to_account_info(),
+                    to: ctx.accounts.seller.to_account_info(),
+                },
+                sol_vault_signer_seeds,
+            ),
+            return_amount,
+        )?;
 
         curve.tokens_bought = curve.tokens_bought.checked_sub(token_amount).unwrap();
 
@@ -148,12 +188,14 @@ pub struct InitializeCurve<'info> {
 
     pub token_mint: Account<'info, Mint>,
 
-    #[account(mut)]
+    #[account(
+        mut,
+        seeds = [b"sol_vault", bonding_curve.key().as_ref()],
+        bump
+    )]
     pub sol_vault: SystemAccount<'info>,
 
     #[account(
-        init,
-        payer = authority,
         associated_token::mint = token_mint,
         associated_token::authority = bonding_curve,
     )]
@@ -176,7 +218,11 @@ pub struct BuyTokens<'info> {
     )]
     pub bonding_curve: Account<'info, BondingCurve>,
 
-    #[account(mut)]
+    #[account(
+        mut,
+        seeds = [b"sol_vault", bonding_curve.key().as_ref()],
+        bump = bonding_curve.sol_vault_bump
+    )]
     pub sol_vault: SystemAccount<'info>,
 
     #[account(
@@ -210,7 +256,11 @@ pub struct SellTokens<'info> {
     )]
     pub bonding_curve: Account<'info, BondingCurve>,
 
-    #[account(mut)]
+    #[account(
+        mut,
+        seeds = [b"sol_vault", bonding_curve.key().as_ref()],
+        bump = bonding_curve.sol_vault_bump
+    )]
     pub sol_vault: SystemAccount<'info>,
 
     #[account(
@@ -249,6 +299,7 @@ pub struct BondingCurve {
     pub base_price: u64,
     pub engagement_multiplier: u64,
     pub bump: u8,
+    pub sol_vault_bump: u8,
 }
 
 fn calculate_buy_cost(

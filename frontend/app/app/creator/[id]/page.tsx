@@ -5,7 +5,7 @@ import { TrendingUp, TrendingDown, Users, Activity, Eye, Video, Play, MessageCir
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { buyTokens, sellTokens } from '@/lib/solana';
+import { buyTokens, sellTokens, getTokensFromSolBuy, getTokensFromSolSell, getUserTokenBalance, getActualSellReturn } from '@/lib/solana';
 
 const getProxiedImageUrl = (url?: string): string | undefined => {
   if (!url || !url.startsWith('https://yt3.ggpht.com/')) {
@@ -25,6 +25,8 @@ export default function CreatorProfile() {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [estimatedTokens, setEstimatedTokens] = useState<number>(0);
+  const [userBalance, setUserBalance] = useState<number>(0);
 
   const fetchCreator = async () => {
     try {
@@ -43,9 +45,55 @@ export default function CreatorProfile() {
     }
   };
 
+  const fetchUserBalance = async () => {
+    if (!wallet.publicKey || !creator) return;
+    try {
+      const balance = await getUserTokenBalance(wallet.publicKey.toString(), creator.tokenAddress);
+      setUserBalance(balance);
+    } catch (error) {
+      console.error('Error fetching balance:', error);
+      setUserBalance(0);
+    }
+  };
+
   useEffect(() => {
     fetchCreator();
   }, [params.id, router]);
+
+  useEffect(() => {
+    if (creator && wallet.publicKey) {
+      fetchUserBalance();
+    }
+  }, [creator, wallet.publicKey]);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(async () => {
+      if (!amount || !creator) {
+        setEstimatedTokens(0);
+        return;
+      }
+      const solAmount = parseFloat(amount);
+      if (solAmount <= 0 || isNaN(solAmount)) {
+        setEstimatedTokens(0);
+        return;
+      }
+      
+      try {
+        if (activeTab === 'buy') {
+          const tokens = await getTokensFromSolBuy(creator.tokenAddress, solAmount);
+          setEstimatedTokens(tokens);
+        } else {
+          const tokens = await getTokensFromSolSell(creator.tokenAddress, solAmount);
+          setEstimatedTokens(tokens);
+        }
+      } catch (err) {
+        console.error('Error fetching estimated tokens:', err);
+        setEstimatedTokens(Math.floor(solAmount / creator.priceSOL));
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [amount, creator, activeTab]);
 
   if (loading) {
     return <div className="p-8 text-center">Loading...</div>;
@@ -56,7 +104,18 @@ export default function CreatorProfile() {
   }
   
   const isPositive = creator.priceChange24h >= 0;
-  const estimatedCost = parseFloat(amount || '0') * creator.priceSOL;
+
+  const handleMax = async () => {
+    if (!wallet.publicKey || !creator || userBalance <= 0) return;
+    
+    try {
+      const solValue = await getActualSellReturn(creator.tokenAddress, userBalance);
+      setAmount(solValue.toFixed(6));
+    } catch (error) {
+      console.error('Error calculating max:', error);
+      setAmount((userBalance * creator.priceSOL).toFixed(6));
+    }
+  };
 
   const handleTrade = async () => {
     if (!wallet.connected || !wallet.publicKey) {
@@ -65,7 +124,17 @@ export default function CreatorProfile() {
     }
 
     if (!amount || parseFloat(amount) <= 0) {
-      setError('Please enter a valid amount');
+      setError('Please enter a valid SOL amount');
+      return;
+    }
+
+    if (activeTab === 'buy' && (!estimatedTokens || estimatedTokens < 0.001)) {
+      setError('Amount too small. Try a larger amount.');
+      return;
+    }
+
+    if (activeTab === 'sell' && (!estimatedTokens || estimatedTokens <= 0)) {
+      setError('No tokens to sell or amount too small');
       return;
     }
 
@@ -74,31 +143,36 @@ export default function CreatorProfile() {
     setSuccess(null);
 
     try {
-      const tokenAmount = parseFloat(amount);
-      const solAmount = estimatedCost;
-      const slippage = 0.02;
-
+      const solAmount = parseFloat(amount);
       let signature: string;
       
       if (activeTab === 'buy') {
-        const maxSol = solAmount * (1 + slippage);
-        signature = await buyTokens(wallet, creator.tokenAddress, tokenAmount, maxSol);
-        setSuccess(`✅ Bought ${tokenAmount} tokens! Tx: ${signature.slice(0, 8)}...`);
+        signature = await buyTokens(wallet, creator.tokenAddress, estimatedTokens, 0);
+        setSuccess(`✅ Bought ${estimatedTokens.toLocaleString(undefined, { maximumFractionDigits: 2 })} tokens for ${solAmount} SOL! Tx: ${signature.slice(0, 8)}...`);
       } else {
-        const minSol = solAmount * (1 - slippage);
-        signature = await sellTokens(wallet, creator.tokenAddress, tokenAmount, minSol);
-        setSuccess(`✅ Sold ${tokenAmount} tokens! Tx: ${signature.slice(0, 8)}...`);
+        signature = await sellTokens(wallet, creator.tokenAddress, estimatedTokens, 0);
+        setSuccess(`✅ Sold ${estimatedTokens.toLocaleString(undefined, { maximumFractionDigits: 2 })} tokens for ${solAmount} SOL! Tx: ${signature.slice(0, 8)}...`);
       }
 
       setAmount('');
+      setEstimatedTokens(0);
       
       setTimeout(() => {
         fetchCreator();
+        fetchUserBalance();
       }, 2000);
 
     } catch (err: any) {
       console.error('Transaction error:', err);
-      setError(err.message || 'Transaction failed. Please try again.');
+      if (err.message && err.message.includes('already been processed')) {
+        setSuccess(`✅ Transaction completed! Check your wallet.`);
+        setTimeout(() => {
+          fetchCreator();
+          fetchUserBalance();
+        }, 1000);
+      } else {
+        setError(err.message || 'Transaction failed. Please try again.');
+      }
     } finally {
       setProcessing(false);
     }
@@ -302,12 +376,12 @@ export default function CreatorProfile() {
                 onClick={() => setActiveTab('buy')}
                 style={{
                   padding: '0.75rem',
-                  border: 'none',
+                  border: activeTab === 'buy' ? 'none' : '1px solid rgba(34, 197, 94, 0.3)',
                   borderRadius: '0.5rem',
                   fontWeight: 600,
                   cursor: 'pointer',
-                  background: activeTab === 'buy' ? 'var(--primary)' : 'transparent',
-                  color: activeTab === 'buy' ? 'white' : 'var(--text-secondary)',
+                  background: activeTab === 'buy' ? '#10b981' : 'transparent',
+                  color: activeTab === 'buy' ? 'white' : '#10b981',
                   transition: 'all 150ms ease'
                 }}
               >
@@ -317,12 +391,12 @@ export default function CreatorProfile() {
                 onClick={() => setActiveTab('sell')}
                 style={{
                   padding: '0.75rem',
-                  border: 'none',
+                  border: activeTab === 'sell' ? 'none' : '1px solid rgba(239, 68, 68, 0.3)',
                   borderRadius: '0.5rem',
                   fontWeight: 600,
                   cursor: 'pointer',
-                  background: activeTab === 'sell' ? 'var(--primary)' : 'transparent',
-                  color: activeTab === 'sell' ? 'white' : 'var(--text-secondary)',
+                  background: activeTab === 'sell' ? '#ef4444' : 'transparent',
+                  color: activeTab === 'sell' ? 'white' : '#ef4444',
                   transition: 'all 150ms ease'
                 }}
               >
@@ -331,27 +405,55 @@ export default function CreatorProfile() {
             </div>
 
             <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-                Amount (tokens)
-              </label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <label style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                  Amount (SOL)
+                </label>
+                {activeTab === 'sell' && userBalance > 0 && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                      Balance: {userBalance.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                    </span>
+                    <button
+                      onClick={handleMax}
+                      style={{
+                        padding: '0.25rem 0.75rem',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        border: '1px solid #ef4444',
+                        background: 'transparent',
+                        color: '#ef4444',
+                        borderRadius: '0.375rem',
+                        cursor: 'pointer',
+                        transition: 'all 150ms ease'
+                      }}
+                      onMouseOver={(e) => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = 'white'; }}
+                      onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#ef4444'; }}
+                    >
+                      MAX
+                    </button>
+                  </div>
+                )}
+              </div>
               <input
                 type="number"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                placeholder="0"
+                placeholder="0.01"
+                step="0.001"
                 className="input"
                 style={{ fontSize: '1.125rem', fontWeight: 600 }}
               />
             </div>
 
-            {amount && (
+            {amount && parseFloat(amount) > 0 && (
               <div className="card-no-hover" style={{ padding: '1rem', marginBottom: '1.5rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                   <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                    You {activeTab === 'buy' ? 'Pay' : 'Receive'}:
+                    You {activeTab === 'buy' ? 'Get' : 'Need'}:
                   </span>
-                  <span style={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
-                    {estimatedCost.toFixed(8)} SOL
+                  <span style={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums', fontSize: '1.125rem', color: 'var(--primary)' }}>
+                    {estimatedTokens > 0 ? `${estimatedTokens.toLocaleString(undefined, { maximumFractionDigits: 2 })} tokens` : 'Calculating...'}
                   </span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
@@ -366,7 +468,7 @@ export default function CreatorProfile() {
                   <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
                     Slippage:
                   </span>
-                  <span style={{ fontWeight: 600 }}>~0.5%</span>
+                  <span style={{ fontWeight: 600 }}>~10%</span>
                 </div>
               </div>
             )}
@@ -398,8 +500,21 @@ export default function CreatorProfile() {
             )}
 
             <button 
-              className="btn-primary" 
-              style={{ width: '100%', padding: '1rem', fontSize: '1rem' }}
+              style={{ 
+                width: '100%', 
+                padding: '1rem', 
+                fontSize: '1rem',
+                fontWeight: 600,
+                border: 'none',
+                borderRadius: '0.5rem',
+                cursor: (!amount || parseFloat(amount) <= 0 || processing || !wallet.connected) ? 'not-allowed' : 'pointer',
+                background: (!amount || parseFloat(amount) <= 0 || processing || !wallet.connected) 
+                  ? '#444' 
+                  : (activeTab === 'buy' ? '#10b981' : '#ef4444'),
+                color: 'white',
+                opacity: (!amount || parseFloat(amount) <= 0 || processing || !wallet.connected) ? 0.5 : 1,
+                transition: 'all 150ms ease'
+              }}
               disabled={!amount || parseFloat(amount) <= 0 || processing || !wallet.connected}
               onClick={handleTrade}
             >
