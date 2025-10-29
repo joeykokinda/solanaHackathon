@@ -27,6 +27,31 @@ export default function LandingPage() {
   }, []);
 
   useEffect(() => {
+    const handleScroll = () => {
+      const revealLines = document.querySelectorAll('.reveal-line');
+      
+      revealLines.forEach((line) => {
+        const rect = line.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+        
+        if (rect.top <= windowHeight * 0.75) {
+          const delay = parseInt(line.getAttribute('data-delay') || '0');
+          setTimeout(() => {
+            (line as HTMLElement).style.opacity = '1';
+            (line as HTMLElement).style.transform = 'translateY(0)';
+            (line as HTMLElement).style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+          }, delay * 200);
+        }
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Check on mount
+    
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
     if (connected) {
       router.push('/app');
     }
@@ -47,7 +72,7 @@ export default function LandingPage() {
           <section style={{ 
             maxWidth: '1200px', 
             margin: '0 auto', 
-            padding: '5rem 2rem',
+            padding: '2rem',
             textAlign: 'center',
             minHeight: '100vh',
             display: 'flex',
@@ -56,41 +81,93 @@ export default function LandingPage() {
             alignItems: 'center'
           }}>
             <h1 style={{ 
-              fontSize: '3.5rem', 
+              fontSize: '4rem', 
               fontWeight: 700, 
-              marginBottom: '2rem',
-              lineHeight: 1.2
+              marginBottom: '1.5rem',
+              lineHeight: 1.1
             }}>
-              What if you found MrBeast at 1,000 subscribers?
+              Invest in Creators<br />Before They Blow Up
             </h1>
             
             <p style={{ 
-              fontSize: '1.5rem', 
+              fontSize: '1.25rem', 
               color: 'var(--gray-light)', 
-              marginBottom: '0.5rem'
+              marginBottom: '3rem',
+              maxWidth: '600px',
+              margin: '0 auto 3rem'
             }}>
-              PewDiePie filming in his Swedish bedroom.
-            </p>
-            
-            <p style={{ 
-              fontSize: '1.5rem', 
-              color: 'var(--gray-light)', 
-              marginBottom: '0.5rem'
-            }}>
-              Emma Chamberlain before her first brand deal.
-            </p>
-            
-            <p style={{ 
-              fontSize: '1.5rem', 
-              color: 'var(--gray-light)', 
-              marginBottom: '3rem'
-            }}>
-              The next viral creator is uploading right now.
+              Buy tokens of YouTubers with 1k-50k subs. Profit as they grow.
             </p>
 
-            <a href="/app" className="btn-primary" style={{ fontSize: '1.125rem', padding: '1rem 2rem' }}>
-              Discover Creators →
-            </a>
+            <div style={{ 
+              display: 'flex', 
+              gap: '1rem', 
+              justifyContent: 'center',
+              flexWrap: 'wrap'
+            }}>
+              <a href="/app" className="btn-primary">
+                Explore Creators
+              </a>
+              <a href="/app" className="btn">
+                Launch App
+              </a>
+            </div>
+          </section>
+
+          <section style={{ 
+            maxWidth: '800px',
+            margin: '0 auto',
+            padding: '8rem 2rem',
+            textAlign: 'center',
+            minHeight: '70vh',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center'
+          }}>
+            <div className="scroll-reveal-text">
+              <h2 style={{ 
+                fontSize: '3rem', 
+                fontWeight: 700, 
+                marginBottom: '2rem',
+                lineHeight: 1.3,
+                opacity: 0.95
+              }}>
+                What if you found MrBeast at 1,000 subscribers?
+              </h2>
+              
+              <p style={{ 
+                fontSize: '1.75rem', 
+                color: 'var(--gray-light)', 
+                marginBottom: '1rem',
+                lineHeight: 1.5,
+                opacity: 0,
+                transform: 'translateY(30px)'
+              }} className="reveal-line" data-delay="0">
+                PewDiePie filming in his Swedish bedroom.
+              </p>
+              
+              <p style={{ 
+                fontSize: '1.75rem', 
+                color: 'var(--gray-light)', 
+                marginBottom: '1rem',
+                lineHeight: 1.5,
+                opacity: 0,
+                transform: 'translateY(30px)'
+              }} className="reveal-line" data-delay="1">
+                Emma Chamberlain before her first brand deal.
+              </p>
+              
+              <p style={{ 
+                fontSize: '1.75rem', 
+                color: 'var(--gray-light)', 
+                marginBottom: '3rem',
+                lineHeight: 1.5,
+                opacity: 0,
+                transform: 'translateY(30px)'
+              }} className="reveal-line" data-delay="2">
+                The next viral creator is uploading right now.
+              </p>
+            </div>
           </section>
 
           <section id="how-it-works" style={{ 
