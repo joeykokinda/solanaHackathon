@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import Image from 'next/image';
 export default function PublicNav() {
   const [scrolled, setScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -54,8 +55,9 @@ export default function PublicNav() {
           }}
         >
           <div className="flex items-center justify-between relative">
-            <a href="/" className="flex items-center gap-2 text-white text-xl font-bold z-10">
-              <span>YouVest</span>
+            <a href="/" className="flex items-center gap-3 text-white text-xl font-bold z-10">
+              <Image src="/logoyouvestyes.png" alt="YouVest Logo" width={28} height={28} />
+              <span style={{ letterSpacing: '0.1em' }}>YOUVEST</span>
             </a>
             <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-6 text-sm">
               <a href="#how-it-works" className="text-gray-300 hover:text-white transition-colors">

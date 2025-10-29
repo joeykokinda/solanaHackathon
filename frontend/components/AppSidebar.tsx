@@ -5,6 +5,7 @@ import { TrendingUp, Wallet, Rocket, LogOut, Coins } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { API_URL } from '@/lib/config';
+import Image from 'next/image';
 export function AppSidebar() {
   const { publicKey, disconnect } = useWallet();
   const { connection } = useConnection();
@@ -65,17 +66,13 @@ export function AppSidebar() {
         marginBottom: '2rem',
         textDecoration: 'none',
       }}>
-        <div style={{
-          width: '32px',
-          height: '32px',
-          backgroundColor: 'white',
-          borderRadius: '8px',
-        }} />
+        <Image src="/logoyouvestyes.png" alt="YouVest Logo" width={32} height={32} />
         <span style={{
           fontSize: '1.25rem',
           fontWeight: 700,
           color: 'white',
-        }}>YouVest</span>
+          letterSpacing: '0.1em',
+        }}>YOUVEST</span>
       </a>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
         {links.map((link) => {

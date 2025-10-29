@@ -84,7 +84,7 @@ export default function LandingPage() {
               maxWidth: '600px',
               margin: '0 auto 3rem'
             }}>
-              Buy tokens of YouTubers with 1k-50k subs. Profit as they grow.
+              Invest in small YouTubers with a lot of potential. Profit as they grow.
             </p>
             <div style={{ 
               display: 'flex', 
@@ -167,21 +167,18 @@ export default function LandingPage() {
               gap: '2rem'
             }}>
               <div className="card-no-hover" style={{ padding: '2rem' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}></div>
                 <h3 style={{ marginBottom: '0.75rem' }}>Discover</h3>
                 <p style={{ color: 'var(--gray)', lineHeight: 1.6 }}>
                   Find early-stage YouTubers with 1k-50k subscribers using YouTube API data
                 </p>
               </div>
               <div className="card-no-hover" style={{ padding: '2rem' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}></div>
                 <h3 style={{ marginBottom: '0.75rem' }}>Invest</h3>
                 <p style={{ color: 'var(--gray)', lineHeight: 1.6 }}>
                   Buy creator tokens on Solana. Price increases as more people buy (bonding curve)
                 </p>
               </div>
               <div className="card-no-hover" style={{ padding: '2rem' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}></div>
                 <h3 style={{ marginBottom: '0.75rem' }}>Track</h3>
                 <p style={{ color: 'var(--gray)', lineHeight: 1.6 }}>
                   Watch token value grow as creators gain subs. Sell anytime for profit (or loss)
@@ -231,28 +228,34 @@ export default function LandingPage() {
               textAlign: 'left'
             }}>
               <div className="card-no-hover" style={{ padding: '2rem' }}>
-                <div style={{ fontSize: '2rem', marginBottom: '1rem' }}></div>
+                <div style={{ marginBottom: '1rem' }}>
+                  <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                    <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="2" />
+                    <path d="M20 10 L20 20 L28 16 Z" fill="white" />
+                  </svg>
+                </div>
                 <h3 style={{ marginBottom: '0.75rem', fontSize: '1.25rem' }}>Spot Talent Early</h3>
                 <p style={{ color: 'var(--gray-light)', lineHeight: 1.6 }}>
                   Get in before they blow up. Tokens are cheapest when creators have &lt;5k subs.
                 </p>
               </div>
               <div className="card-no-hover" style={{ padding: '2rem' }}>
-                <div style={{ fontSize: '2rem', marginBottom: '1rem' }}></div>
+                <div style={{ marginBottom: '1rem' }}>
+                  <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                    <rect x="8" y="12" width="24" height="16" stroke="white" strokeWidth="2" rx="2" />
+                    <path d="M12 20 L20 24 L28 20" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                </div>
                 <h3 style={{ marginBottom: '0.75rem', fontSize: '1.25rem' }}>Fair Pricing</h3>
                 <p style={{ color: 'var(--gray-light)', lineHeight: 1.6 }}>
                   Bonding curve = no BS. Price goes up with demand, down with sells. Pure math.
                 </p>
               </div>
               <div className="card-no-hover" style={{ padding: '2rem' }}>
-                <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <svg width="32" height="32" viewBox="0 0 397.7 311.7" style={{ display: 'block' }}>
-                    <linearGradient id="solana-gradient" x2="0.35" y2="1">
-                      <stop offset="0%" stopColor="#00FFA3" />
-                      <stop offset="50%" stopColor="#DC1FFF" />
-                      <stop offset="100%" stopColor="#00FFA3" />
-                    </linearGradient>
-                    <path fill="url(#solana-gradient)" d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7zm0-64.6c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7zM6.5 3.8h317.4c3.5 0 6.8 1.4 9.2 3.8l62.7 62.7c4.1 4.1 1.2 11.1-4.6 11.1H73.8c-3.5 0-6.8-1.4-9.2-3.8L1.9 14.9C-2.2 10.8.7 3.8 6.5 3.8z"/>
+                <div style={{ marginBottom: '1rem' }}>
+                  <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                    <polygon points="20,8 32,15 32,25 20,32 8,25 8,15" stroke="white" strokeWidth="2" fill="none" />
+                    <circle cx="20" cy="20" r="4" fill="white" />
                   </svg>
                 </div>
                 <h3 style={{ marginBottom: '0.75rem', fontSize: '1.25rem' }}>Built on Solana</h3>
@@ -287,21 +290,36 @@ export default function LandingPage() {
               marginBottom: '3rem'
             }}>
               <div className="card-no-hover" style={{ padding: '2rem', textAlign: 'center' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}></div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+                  <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                    <rect x="8" y="10" width="24" height="20" rx="2" stroke="white" strokeWidth="2" />
+                    <polygon points="16,18 24,22 16,26" fill="white" />
+                  </svg>
+                </div>
                 <h3 style={{ marginBottom: '0.75rem', fontSize: '1.125rem' }}>Connect YouTube</h3>
                 <p style={{ color: 'var(--gray)', lineHeight: 1.6, fontSize: '0.95rem' }}>
                   Verify ownership of your channel with one click
                 </p>
               </div>
               <div className="card-no-hover" style={{ padding: '2rem', textAlign: 'center' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🪙</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+                  <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                    <circle cx="20" cy="20" r="14" stroke="white" strokeWidth="2" />
+                    <circle cx="20" cy="20" r="8" fill="white" />
+                  </svg>
+                </div>
                 <h3 style={{ marginBottom: '0.75rem', fontSize: '1.125rem' }}>Launch Token</h3>
                 <p style={{ color: 'var(--gray)', lineHeight: 1.6, fontSize: '0.95rem' }}>
                   Create a real token on Solana with a bonding curve
                 </p>
               </div>
               <div className="card-no-hover" style={{ padding: '2rem', textAlign: 'center' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}></div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+                  <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                    <path d="M20 8 L30 15 L30 25 L20 32 L10 25 L10 15 Z" stroke="white" strokeWidth="2" fill="none" />
+                    <path d="M20 16 L20 24 M16 20 L24 20" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                </div>
                 <h3 style={{ marginBottom: '0.75rem', fontSize: '1.125rem' }}>Grow Together</h3>
                 <p style={{ color: 'var(--gray)', lineHeight: 1.6, fontSize: '0.95rem' }}>
                   Your fans profit when you grow. Built-in liquidity
