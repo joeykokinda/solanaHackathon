@@ -5,10 +5,12 @@ const { calculateAvgViews } = require('../services/youtube');
 const router = express.Router();
 const prisma = new PrismaClient();
 
+const REDIRECT_URI = process.env.YOUTUBE_REDIRECT_URI || 'http://localhost:3000/app/launch/callback';
+
 const oauth2Client = new google.auth.OAuth2(
   process.env.YOUTUBE_CLIENT_ID,
   process.env.YOUTUBE_CLIENT_SECRET,
-  'http://localhost:3000/app/launch/callback'
+  REDIRECT_URI
 );
 
 router.get('/auth-url', (req, res) => {
