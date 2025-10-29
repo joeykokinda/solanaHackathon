@@ -45,17 +45,37 @@ router.get('/:wallet/portfolio', async (req, res) => {
         });
 
         if (creator) {
-          const currentPrice = 0.015;
-          const currentValue = Number(data.amount) * currentPrice;
-          const pnl = currentValue - data.invested;
-          const pnlPercent = data.invested > 0 ? (pnl / data.invested) * 100 : 0;
+          const tokenAmountInUnits = Number(data.amount) / 1e9;
+          
+          const transactions = await prisma.transaction.findMany({
+            where: { tokenAddress: creator.tokenAddress }
+          });
+          
+          const tokensBought = transactions.reduce((sum, tx) => {
+            if (tx.type === 'buy') return sum + Number(tx.tokenAmount);
+            if (tx.type === 'sell') return sum - Number(tx.tokenAmount);
+            return sum;
+          }, 0);
+          
+          const BASE_PRICE_LAMPORTS = 1000;
+          const LAMPORTS_PER_SOL = 1_000_000_000;
+          
+          const supplyInTokens = tokensBought / LAMPORTS_PER_SOL;
+          const curve = (supplyInTokens * supplyInTokens) / 10_000;
+          const priceInLamports = BASE_PRICE_LAMPORTS + curve;
+          const currentPrice = priceInLamports / LAMPORTS_PER_SOL;
+          
+          const currentValue = tokenAmountInUnits * currentPrice;
+          const investedInSOL = data.invested / 1e9;
+          const pnl = currentValue - investedInSOL;
+          const pnlPercent = investedInSOL > 0 ? (pnl / investedInSOL) * 100 : 0;
           const latestMetrics = creator.metricsHistory[0] || {};
 
           holdings.push({
             tokenAddress,
-            amount: Number(data.amount),
+            amount: tokenAmountInUnits,
             value: currentValue,
-            invested: data.invested,
+            invested: investedInSOL,
             pnl,
             pnlPercent,
             creator: {
@@ -68,7 +88,7 @@ router.get('/:wallet/portfolio', async (req, res) => {
           });
 
           totalValue += currentValue;
-          totalInvested += data.invested;
+          totalInvested += investedInSOL;
         }
       }
     }

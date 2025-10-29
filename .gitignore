@@ -86,3 +86,7 @@ prisma/migrations/**/migration.sql
 *.tsbuildinfo
 next-env.d.ts
 
+
+# Test wallets (DON'T COMMIT PRIVATE KEYS!)
+test-wallet.json
+*.json.backup

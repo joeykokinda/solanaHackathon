@@ -108,9 +108,15 @@ router.get('/', async (req, res) => {
         return sum;
       }, 0);
 
-      const basePrice = 0.01;
+      const BASE_PRICE_LAMPORTS = 1000;
+      const LAMPORTS_PER_SOL = 1_000_000_000;
+      
+      const supplyInTokens = tokensBought / LAMPORTS_PER_SOL;
+      const curve = (supplyInTokens * supplyInTokens) / 10_000;
+      const priceInLamports = BASE_PRICE_LAMPORTS + curve;
+      const currentPrice = priceInLamports / LAMPORTS_PER_SOL;
+      
       const totalSupply = 100_000_000;
-      const currentPrice = basePrice * (1 + (tokensBought / totalSupply) * 0.5);
 
       const now = new Date();
       const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
@@ -118,7 +124,7 @@ router.get('/', async (req, res) => {
       
       const volume24h = txs24h.reduce((sum, tx) => sum + Number(tx.solAmount) / 1e9, 0);
       
-      const priceYesterday = transactions.length > 0 ? Number(transactions[transactions.length - 1].pricePerToken) : basePrice;
+      const priceYesterday = transactions.length > 0 ? Number(transactions[transactions.length - 1].pricePerToken) : currentPrice;
       const priceChange24h = priceYesterday > 0 ? ((currentPrice - priceYesterday) / priceYesterday) * 100 : 0;
 
       const uniqueWallets = new Set(transactions.map(tx => tx.buyerWallet));
@@ -188,9 +194,15 @@ router.get('/:id', async (req, res) => {
       return sum;
     }, 0);
 
-    const basePrice = 0.01;
+    const BASE_PRICE_LAMPORTS = 1000;
+    const LAMPORTS_PER_SOL = 1_000_000_000;
+    
+    const supplyInTokens = tokensBought / LAMPORTS_PER_SOL;
+    const curve = (supplyInTokens * supplyInTokens) / 10_000;
+    const priceInLamports = BASE_PRICE_LAMPORTS + curve;
+    const currentPrice = priceInLamports / LAMPORTS_PER_SOL;
+    
     const totalSupply = 100_000_000;
-    const currentPrice = basePrice * (1 + (tokensBought / totalSupply) * 0.5);
 
     const now = new Date();
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
@@ -198,7 +210,7 @@ router.get('/:id', async (req, res) => {
     
     const volume24h = txs24h.reduce((sum, tx) => sum + Number(tx.solAmount) / 1e9, 0);
     
-    const priceYesterday = transactions.length > 0 ? Number(transactions[transactions.length - 1].pricePerToken) : basePrice;
+    const priceYesterday = transactions.length > 0 ? Number(transactions[transactions.length - 1].pricePerToken) : currentPrice;
     const priceChange24h = priceYesterday > 0 ? ((currentPrice - priceYesterday) / priceYesterday) * 100 : 0;
 
     const uniqueWallets = new Set(transactions.map(tx => tx.buyerWallet));

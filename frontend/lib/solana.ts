@@ -1,4 +1,4 @@
-import { Connection, PublicKey, SystemProgram, Transaction, TransactionInstruction, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { Connection, PublicKey, SystemProgram, Transaction, TransactionInstruction, LAMPORTS_PER_SOL, ComputeBudgetProgram } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddress } from '@solana/spl-token';
 import { WalletContextState } from '@solana/wallet-adapter-react';
 import BN from 'bn.js';
@@ -117,6 +117,29 @@ export async function buyTokens(
     ASSOCIATED_TOKEN_PROGRAM_ID
   );
 
+  const transaction = new Transaction();
+
+  transaction.add(
+    ComputeBudgetProgram.setComputeUnitLimit({ units: 1_400_000 })
+  );
+  transaction.add(
+    ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 100 })
+  );
+
+  // Check if buyer's token account exists, if not, create it
+  const buyerAccountInfo = await connection.getAccountInfo(buyerTokenAccount);
+  if (!buyerAccountInfo) {
+    const { createAssociatedTokenAccountInstruction } = await import('@solana/spl-token');
+    transaction.add(
+      createAssociatedTokenAccountInstruction(
+        wallet.publicKey,
+        buyerTokenAccount,
+        wallet.publicKey,
+        tokenMint
+      )
+    );
+  }
+
   const tokenAmountBN = new BN(amount * 1e9);
   const maxSolBN = new BN(maxSolAmount * LAMPORTS_PER_SOL);
 
@@ -130,7 +153,7 @@ export async function buyTokens(
     maxSolBN
   );
 
-  const transaction = new Transaction().add(instruction);
+  transaction.add(instruction);
   transaction.feePayer = wallet.publicKey;
   transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
@@ -177,6 +200,15 @@ export async function sellTokens(
   const tokenAmountBN = new BN(amount * 1e9);
   const minSolBN = new BN(minSolAmount * LAMPORTS_PER_SOL);
 
+  const transaction = new Transaction();
+
+  transaction.add(
+    ComputeBudgetProgram.setComputeUnitLimit({ units: 1_400_000 })
+  );
+  transaction.add(
+    ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 100 })
+  );
+
   const instruction = createSellInstruction(
     wallet.publicKey,
     bondingCurve,
@@ -187,7 +219,7 @@ export async function sellTokens(
     minSolBN
   );
 
-  const transaction = new Transaction().add(instruction);
+  transaction.add(instruction);
   transaction.feePayer = wallet.publicKey;
   transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 

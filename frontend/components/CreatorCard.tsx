@@ -173,7 +173,7 @@ export default function CreatorCard({ creator }: CreatorCardProps) {
               Token Price
             </div>
             <div style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '0.25rem', fontVariantNumeric: 'tabular-nums' }}>
-              {creator.priceSOL.toFixed(3)} SOL
+              {creator.priceSOL.toFixed(8)} SOL
             </div>
             <div style={{ 
               fontSize: '0.875rem',

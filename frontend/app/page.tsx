@@ -62,12 +62,17 @@ export default function LandingPage() {
           speed={0.2}
         />
         
-        <div style={{ position: 'relative', zIndex: 1, paddingTop: '120px' }}>
+        <div style={{ position: 'relative', zIndex: 1 }}>
           <section style={{ 
             maxWidth: '1200px', 
             margin: '0 auto', 
-            padding: '4rem 2rem',
-            textAlign: 'center'
+            padding: '2rem',
+            textAlign: 'center',
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center'
           }}>
             <h1 style={{ 
               fontSize: '4rem', 
@@ -239,11 +244,11 @@ export default function LandingPage() {
 
           <section id="how-it-works" style={{ 
             maxWidth: '1000px', 
-            margin: '6rem auto', 
-            padding: '0 2rem',
+            margin: '0 auto', 
+            padding: '12rem 2rem 8rem',
             textAlign: 'center'
           }}>
-            <h2 style={{ fontSize: '2.5rem', marginBottom: '3rem' }}>
+            <h2 style={{ fontSize: '2.5rem', marginBottom: '4girem' }}>
               How It Works
             </h2>
             
@@ -280,10 +285,10 @@ export default function LandingPage() {
 
           <section id="featured" style={{ 
             maxWidth: '1200px', 
-            margin: '6rem auto', 
-            padding: '0 2rem'
+            margin: '0 auto', 
+            padding: '8rem 2rem'
           }}>
-            <h2 style={{ fontSize: '2rem', marginBottom: '2rem', textAlign: 'center' }}>
+            <h2 style={{ fontSize: '2rem', marginBottom: '3rem', textAlign: 'center' }}>
               Featured Creators
             </h2>
             
@@ -307,11 +312,11 @@ export default function LandingPage() {
 
           <section style={{ 
             maxWidth: '1000px', 
-            margin: '6rem auto', 
-            padding: '0 2rem',
+            margin: '0 auto', 
+            padding: '8rem 2rem',
             textAlign: 'center'
           }}>
-            <h2 style={{ fontSize: '2.5rem', marginBottom: '3rem' }}>
+            <h2 style={{ fontSize: '2.5rem', marginBottom: '4rem' }}>
               Why YouVest?
             </h2>
             
@@ -349,10 +354,10 @@ export default function LandingPage() {
 
           <section id="faq" style={{ 
             maxWidth: '800px', 
-            margin: '6rem auto', 
-            padding: '0 2rem'
+            margin: '0 auto', 
+            padding: '8rem 2rem'
           }}>
-            <h2 style={{ fontSize: '2.5rem', marginBottom: '3rem', textAlign: 'center' }}>
+            <h2 style={{ fontSize: '2.5rem', marginBottom: '4rem', textAlign: 'center' }}>
               FAQ
             </h2>
             
@@ -403,8 +408,8 @@ export default function LandingPage() {
 
           <section style={{ 
             maxWidth: '1000px', 
-            margin: '6rem auto 2rem', 
-            padding: '4rem 2rem',
+            margin: '0 auto', 
+            padding: '8rem 2rem',
             textAlign: 'center'
           }}>
             <h2 style={{ fontSize: '2.5rem', marginBottom: '1.5rem' }}>
@@ -427,7 +432,7 @@ export default function LandingPage() {
           <footer style={{ 
             maxWidth: '1200px', 
             margin: '0 auto', 
-            padding: '3rem 2rem',
+            padding: '4rem 2rem',
             textAlign: 'center',
             borderTop: '1px solid var(--border)',
             color: 'var(--gray)'

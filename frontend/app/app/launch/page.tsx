@@ -70,6 +70,7 @@ export default function LaunchToken() {
             }
 
             const channelInfo = await verifyResponse.json();
+            setError(null); // Clear any previous errors
             setChannelData(channelInfo);
             setStep(2);
           } catch (err: any) {

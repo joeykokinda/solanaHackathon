@@ -3,15 +3,35 @@
 import { useWallet } from '@solana/wallet-adapter-react';
 import { usePathname } from 'next/navigation';
 import { TrendingUp, Wallet, Rocket, LogOut } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 export function AppSidebar() {
   const { publicKey, disconnect } = useWallet();
   const pathname = usePathname();
+  const [userCreator, setUserCreator] = useState<any>(null);
+  const [loadingCreator, setLoadingCreator] = useState(true);
+
+  useEffect(() => {
+    if (publicKey) {
+      fetch(`http://localhost:3001/api/creators`)
+        .then(res => res.json())
+        .then(data => {
+          const creator = data.creators?.find((c: any) => 
+            c.userId && c.tokenAddress && !c.tokenAddress.startsWith('TOKEN')
+          );
+          setUserCreator(creator);
+          setLoadingCreator(false);
+        })
+        .catch(() => setLoadingCreator(false));
+    }
+  }, [publicKey]);
 
   const links = [
     { label: 'Markets', href: '/app', icon: TrendingUp },
     { label: 'Portfolio', href: '/app/portfolio', icon: Wallet },
-    { label: 'Launch', href: '/app/launch', icon: Rocket },
+    userCreator 
+      ? { label: 'Your Token', href: `/app/creator/${userCreator.id}`, icon: Rocket }
+      : { label: 'Launch', href: '/app/launch', icon: Rocket },
   ];
 
   const shortenAddress = (address: string) => {

@@ -6,6 +6,11 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 
 export default function PublicNav() {
   const [scrolled, setScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -72,7 +77,7 @@ export default function PublicNav() {
             </div>
 
             <div className="shrink-0 z-10">
-              <WalletMultiButton />
+              {mounted ? <WalletMultiButton /> : <div style={{ width: '140px', height: '36px' }} />}
             </div>
           </div>
         </motion.nav>

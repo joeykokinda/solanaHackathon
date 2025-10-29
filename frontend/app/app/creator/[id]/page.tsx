@@ -26,24 +26,24 @@ export default function CreatorProfile() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchCreator = async () => {
-      try {
-        const response = await fetch(`http://localhost:3001/api/creators/${params.id}`);
-        if (!response.ok) {
-          router.push('/app');
-          return;
-        }
-        const data = await response.json();
-        setCreator(data);
-      } catch (error) {
-        console.error('Error fetching creator:', error);
+  const fetchCreator = async () => {
+    try {
+      const response = await fetch(`http://localhost:3001/api/creators/${params.id}`);
+      if (!response.ok) {
         router.push('/app');
-      } finally {
-        setLoading(false);
+        return;
       }
-    };
-    
+      const data = await response.json();
+      setCreator(data);
+    } catch (error) {
+      console.error('Error fetching creator:', error);
+      router.push('/app');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchCreator();
   }, [params.id, router]);
 
@@ -160,12 +160,7 @@ export default function CreatorProfile() {
         </div>
       </div>
 
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '2fr 1fr',
-        gap: '2rem',
-        '@media (max-width: 1024px)': { gridTemplateColumns: '1fr' }
-      }} className="grid lg:grid-cols-[2fr_1fr] gap-6">
+      <div className="grid lg:grid-cols-[2fr_1fr] gap-6">
         <div>
           <div className="card-no-hover" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
@@ -174,7 +169,7 @@ export default function CreatorProfile() {
                   Token Price
                 </p>
                 <h2 style={{ fontSize: '2.25rem', marginBottom: '0.5rem', fontVariantNumeric: 'tabular-nums' }}>
-                  {creator.priceSOL.toFixed(3)} SOL
+                  {creator.priceSOL.toFixed(8)} SOL
                 </h2>
                 <p style={{ 
                   color: isPositive ? 'var(--success)' : 'var(--danger)',
@@ -244,9 +239,6 @@ export default function CreatorProfile() {
                 <p style={{ fontSize: '1.5rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
                   {creator.subscribers.toLocaleString()}
                 </p>
-                <p style={{ fontSize: '0.875rem', color: 'var(--success)' }}>
-                  +{Math.round((creator.subscribers - creator.initialSubscribers) / creator.initialSubscribers * 100)}% since launch
-                </p>
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
@@ -255,21 +247,6 @@ export default function CreatorProfile() {
                 </div>
                 <p style={{ fontSize: '1.5rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
                   {creator.avgViews.toLocaleString()}
-                </p>
-                <p style={{ fontSize: '0.875rem', color: 'var(--success)' }}>
-                  +{Math.round((creator.avgViews - creator.initialAvgViews) / creator.initialAvgViews * 100)}% since launch
-                </p>
-              </div>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                  <Video size={20} style={{ color: 'var(--text-secondary)' }} />
-                  <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Upload Frequency</p>
-                </div>
-                <p style={{ fontSize: '1.5rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
-                  {creator.uploadFrequency?.toFixed(1)}
-                </p>
-                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                  videos per week
                 </p>
               </div>
             </div>
@@ -374,7 +351,7 @@ export default function CreatorProfile() {
                     You {activeTab === 'buy' ? 'Pay' : 'Receive'}:
                   </span>
                   <span style={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
-                    {estimatedCost.toFixed(4)} SOL
+                    {estimatedCost.toFixed(8)} SOL
                   </span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
@@ -382,7 +359,7 @@ export default function CreatorProfile() {
                     Price:
                   </span>
                   <span style={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
-                    {creator.priceSOL.toFixed(4)} SOL/token
+                    {creator.priceSOL.toFixed(8)} SOL/token
                   </span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -471,7 +448,7 @@ export default function CreatorProfile() {
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <div style={{ fontSize: '0.875rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
-                        {trade.price.toFixed(3)} SOL
+                        {trade.price.toFixed(8)} SOL
                       </div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
                         {trade.time}

@@ -7,8 +7,9 @@ use anchor_spl::{
 
 declare_id!("ASKaLZvuV9TW6MKxNjQoKAQihzEAaVDzMryFqgvzDswi");
 
-const BASE_PRICE: u64 = 10_000_000;
+const BASE_PRICE: u64 = 1_000;
 const SCALE_FACTOR: u64 = 1_000_000_000;
+const CURVE_FACTOR: u64 = 100_000_000_000_000;
 
 #[program]
 pub mod bonding_curve {
@@ -256,26 +257,35 @@ fn calculate_buy_cost(
     base_price: u64,
     engagement_multiplier: u64,
 ) -> Result<u64> {
-    let mut total_cost: u64 = 0;
-
-    for i in 0..amount {
-        let current_tokens = current_supply + i;
-        let curve_multiplier = SCALE_FACTOR + (current_tokens * SCALE_FACTOR / 10_000_000_000_000);
-
-        let price = base_price
-            .checked_mul(curve_multiplier)
-            .unwrap()
-            .checked_div(SCALE_FACTOR)
-            .unwrap();
-
-        let final_price = price
-            .checked_mul(engagement_multiplier)
-            .unwrap()
-            .checked_div(SCALE_FACTOR)
-            .unwrap();
-
-        total_cost = total_cost.checked_add(final_price).unwrap();
-    }
+    let supply_before_tokens = current_supply.checked_div(SCALE_FACTOR).unwrap_or(0);
+    let amount_tokens = amount.checked_div(SCALE_FACTOR).unwrap_or(1);
+    let supply_after_tokens = supply_before_tokens.checked_add(amount_tokens).unwrap();
+    
+    let curve_before = supply_before_tokens
+        .checked_mul(supply_before_tokens)
+        .unwrap_or(0)
+        .checked_div(10_000)
+        .unwrap_or(0);
+    
+    let curve_after = supply_after_tokens
+        .checked_mul(supply_after_tokens)
+        .unwrap_or(0)
+        .checked_div(10_000)
+        .unwrap_or(0);
+    
+    let price_before = base_price.checked_add(curve_before).unwrap();
+    let price_after = base_price.checked_add(curve_after).unwrap();
+    let avg_price = price_before.checked_add(price_after).unwrap().checked_div(2).unwrap();
+    
+    let total_cost = avg_price
+        .checked_mul(amount)
+        .unwrap()
+        .checked_div(SCALE_FACTOR)
+        .unwrap()
+        .checked_mul(engagement_multiplier)
+        .unwrap()
+        .checked_div(SCALE_FACTOR)
+        .unwrap();
 
     Ok(total_cost)
 }
@@ -286,26 +296,35 @@ fn calculate_sell_return(
     base_price: u64,
     engagement_multiplier: u64,
 ) -> Result<u64> {
-    let mut total_return: u64 = 0;
-
-    for i in 0..amount {
-        let current_tokens = current_supply - i - 1;
-        let curve_multiplier = SCALE_FACTOR + (current_tokens * SCALE_FACTOR / 10_000_000_000_000);
-
-        let price = base_price
-            .checked_mul(curve_multiplier)
-            .unwrap()
-            .checked_div(SCALE_FACTOR)
-            .unwrap();
-
-        let final_price = price
-            .checked_mul(engagement_multiplier)
-            .unwrap()
-            .checked_div(SCALE_FACTOR)
-            .unwrap();
-
-        total_return = total_return.checked_add(final_price).unwrap();
-    }
+    let supply_before_tokens = current_supply.checked_div(SCALE_FACTOR).unwrap_or(0);
+    let amount_tokens = amount.checked_div(SCALE_FACTOR).unwrap_or(1);
+    let supply_after_tokens = supply_before_tokens.checked_sub(amount_tokens).unwrap_or(0);
+    
+    let curve_before = supply_before_tokens
+        .checked_mul(supply_before_tokens)
+        .unwrap_or(0)
+        .checked_div(10_000)
+        .unwrap_or(0);
+    
+    let curve_after = supply_after_tokens
+        .checked_mul(supply_after_tokens)
+        .unwrap_or(0)
+        .checked_div(10_000)
+        .unwrap_or(0);
+    
+    let price_before = base_price.checked_add(curve_before).unwrap();
+    let price_after = base_price.checked_add(curve_after).unwrap();
+    let avg_price = price_before.checked_add(price_after).unwrap().checked_div(2).unwrap();
+    
+    let total_return = avg_price
+        .checked_mul(amount)
+        .unwrap()
+        .checked_div(SCALE_FACTOR)
+        .unwrap()
+        .checked_mul(engagement_multiplier)
+        .unwrap()
+        .checked_div(SCALE_FACTOR)
+        .unwrap();
 
     Ok(total_return)
 }

@@ -53,6 +53,12 @@ router.post('/verify-channel', async (req, res) => {
     const stats = channel.statistics;
     const subscribers = parseInt(stats.subscriberCount || 0);
     const videoCount = parseInt(stats.videoCount || 0);
+    
+    console.log('YouTube channel data:', {
+      name: channel.snippet.title,
+      subscribers,
+      thumbnails: Object.keys(channel.snippet.thumbnails || {})
+    });
 
     // Validation disabled for hackathon demo
     // if (subscribers < 1000) {
@@ -84,10 +90,16 @@ router.post('/verify-channel', async (req, res) => {
       avgViews = Math.floor(parseInt(stats.viewCount) / videoCount);
     }
 
+    // Get best quality avatar
+    const avatar = channel.snippet.thumbnails.medium?.url 
+      || channel.snippet.thumbnails.high?.url 
+      || channel.snippet.thumbnails.default?.url
+      || `https://ui-avatars.com/api/?name=${encodeURIComponent(channel.snippet.title)}&size=200`;
+
     res.json({
       youtubeChannelId: channel.id,
       channelName: channel.snippet.title,
-      channelAvatar: channel.snippet.thumbnails.high?.url || channel.snippet.thumbnails.default?.url,
+      channelAvatar: avatar,
       subscribers,
       videoCount,
       totalViews: parseInt(stats.viewCount || 0),
