@@ -49,5 +49,40 @@ router.get('/recent/:tokenAddress', async (req, res) => {
   }
 });
 
+router.get('/:walletAddress', async (req, res) => {
+  try {
+    const { walletAddress } = req.params;
+    const limit = parseInt(req.query.limit) || 20;
+
+    const transactions = await prisma.transaction.findMany({
+      where: { buyerWallet: walletAddress },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      include: {
+        creator: {
+          select: {
+            channelName: true,
+            channelAvatar: true
+          }
+        }
+      }
+    });
+
+    const formattedTransactions = transactions.map(tx => ({
+      signature: tx.txSignature,
+      transactionType: tx.transactionType,
+      amount: (Number(tx.tokenAmount) / 1e9).toString(),
+      solAmount: (Number(tx.solAmount) / 1e9).toString(),
+      createdAt: tx.createdAt,
+      creator: tx.creator
+    }));
+
+    res.json({ transactions: formattedTransactions });
+  } catch (error) {
+    console.error('Error fetching wallet transactions:', error);
+    res.status(500).json({ error: 'Failed to fetch transactions', transactions: [] });
+  }
+});
+
 module.exports = router;
 

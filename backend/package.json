@@ -5,10 +5,12 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/server.js",
+    "build": "prisma generate",
     "dev": "nodemon src/server.js",
     "cron": "node src/cron/updateMetrics.js",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "seed": "node scripts/seedFeaturedCreators.js && node scripts/createRealTokens.js"
   },
   "keywords": [],
   "author": "",

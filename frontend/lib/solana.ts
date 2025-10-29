@@ -3,8 +3,10 @@ import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddres
 import { WalletContextState } from '@solana/wallet-adapter-react';
 import BN from 'bn.js';
 
+import { SOLANA_RPC, API_URL } from './config';
+
 const BONDING_CURVE_PROGRAM_ID = new PublicKey('ASKaLZvuV9TW6MKxNjQoKAQihzEAaVDzMryFqgvzDswi');
-const RPC_ENDPOINT = 'https://api.devnet.solana.com';
+const RPC_ENDPOINT = SOLANA_RPC;
 
 const bondingCurveIDL = {
   "address": "ASKaLZvuV9TW6MKxNjQoKAQihzEAaVDzMryFqgvzDswi",
@@ -587,7 +589,7 @@ async function recordTransaction(
   solAmount: number
 ): Promise<void> {
   try {
-    await fetch('http://localhost:3001/api/transactions', {
+    await fetch(`${API_URL}/api/transactions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

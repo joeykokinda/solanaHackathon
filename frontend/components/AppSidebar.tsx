@@ -1,19 +1,23 @@
 'use client';
 
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { usePathname } from 'next/navigation';
-import { TrendingUp, Wallet, Rocket, LogOut } from 'lucide-react';
+import { TrendingUp, Wallet, Rocket, LogOut, Coins } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { API_URL } from '@/lib/config';
 
 export function AppSidebar() {
   const { publicKey, disconnect } = useWallet();
+  const { connection } = useConnection();
   const pathname = usePathname();
   const [userCreator, setUserCreator] = useState<any>(null);
   const [loadingCreator, setLoadingCreator] = useState(true);
+  const [solBalance, setSolBalance] = useState<number | null>(null);
 
   useEffect(() => {
     if (publicKey) {
-      fetch(`http://localhost:3001/api/creators`)
+      fetch(`${API_URL}/api/creators`)
         .then(res => res.json())
         .then(data => {
           const creator = data.creators?.find((c: any) => 
@@ -23,8 +27,21 @@ export function AppSidebar() {
           setLoadingCreator(false);
         })
         .catch(() => setLoadingCreator(false));
+
+      const fetchBalance = async () => {
+        try {
+          const balance = await connection.getBalance(publicKey);
+          setSolBalance(balance / LAMPORTS_PER_SOL);
+        } catch (error) {
+          console.error('Error fetching SOL balance:', error);
+        }
+      };
+      fetchBalance();
+      
+      const interval = setInterval(fetchBalance, 10000);
+      return () => clearInterval(interval);
     }
-  }, [publicKey]);
+  }, [publicKey, connection]);
 
   const links = [
     { label: 'Markets', href: '/app', icon: TrendingUp },
@@ -113,6 +130,29 @@ export function AppSidebar() {
         flexDirection: 'column',
         gap: '0.5rem',
       }}>
+        {publicKey && solBalance !== null && (
+          <div style={{
+            padding: '0.75rem',
+            borderRadius: '0.5rem',
+            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+            border: '1px solid rgba(139, 92, 246, 0.3)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+              <Coins size={14} style={{ color: '#a78bfa' }} />
+              <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
+                SOL Balance
+              </div>
+            </div>
+            <div style={{
+              fontSize: '1.125rem',
+              color: '#a78bfa',
+              fontFamily: 'monospace',
+              fontWeight: 600,
+            }}>
+              {solBalance.toFixed(4)}
+            </div>
+          </div>
+        )}
         {publicKey && (
           <div style={{
             padding: '0.75rem',

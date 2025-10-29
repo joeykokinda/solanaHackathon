@@ -1,23 +1,29 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { DollarSign, TrendingUp, Percent, ExternalLink, Inbox } from 'lucide-react';
+import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 import Link from 'next/link';
+import { getUserTokenBalance } from '@/lib/solana';
+import { API_URL } from '@/lib/config';
 
 const getProxiedImageUrl = (url?: string): string | undefined => {
   if (!url || !url.startsWith('https://yt3.ggpht.com/')) {
     return url;
   }
-  return `http://localhost:3001/api/proxy-image?url=${encodeURIComponent(url)}`;
+  return `${API_URL}/api/proxy-image?url=${encodeURIComponent(url)}`;
 };
 
 export default function Portfolio() {
   const { connected, publicKey } = useWallet();
+  const { connection } = useConnection();
   const [mounted, setMounted] = useState(false);
   const [holdings, setHoldings] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [solBalance, setSolBalance] = useState(0);
   
   useEffect(() => {
     setMounted(true);
@@ -26,21 +32,71 @@ export default function Portfolio() {
   useEffect(() => {
     if (connected && publicKey) {
       fetchPortfolio();
+      fetchSolBalance();
+      fetchTransactions();
     }
   }, [connected, publicKey]);
+
+  const fetchSolBalance = async () => {
+    if (!publicKey) return;
+    try {
+      const balance = await connection.getBalance(publicKey);
+      setSolBalance(balance / LAMPORTS_PER_SOL);
+    } catch (error) {
+      console.error('Error fetching SOL balance:', error);
+    }
+  };
+
+  const fetchTransactions = async () => {
+    if (!publicKey) return;
+    try {
+      const response = await fetch(`${API_URL}/api/transactions/${publicKey.toString()}`);
+      if (response.ok) {
+        const data = await response.json();
+        setTransactions(data.transactions || []);
+      }
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+    }
+  };
 
   const fetchPortfolio = async () => {
     if (!publicKey) return;
     
+    setLoading(true);
     try {
-      const response = await fetch(`http://localhost:3001/api/users/${publicKey.toString()}/portfolio`);
-      const data = await response.json();
+      const creatorsResponse = await fetch(`${API_URL}/api/creators`);
+      const creatorsData = await creatorsResponse.json();
       
-      if (data.holdings) {
-        setHoldings(data.holdings);
-      }
+      const holdingsPromises = creatorsData.creators.map(async (creator: any) => {
+        try {
+          const balance = await getUserTokenBalance(publicKey.toString(), creator.tokenAddress);
+          if (balance > 0) {
+            const valueInSOL = balance * creator.priceSOL;
+            return {
+              creator,
+              amount: balance,
+              value: valueInSOL,
+              pnl: 0,
+              pnlPercent: 0,
+              invested: valueInSOL
+            };
+          }
+          return null;
+        } catch (error) {
+          return null;
+        }
+      });
+      
+      const allHoldings = await Promise.all(holdingsPromises);
+      const validHoldings = allHoldings.filter(h => h !== null);
+      
+      setHoldings(validHoldings);
     } catch (error) {
+      console.error('Error fetching portfolio:', error);
       setHoldings([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -82,16 +138,25 @@ export default function Portfolio() {
 
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
         gap: '1rem',
         marginBottom: '2.5rem'
       }}>
         <div className="card-no-hover" style={{ padding: '1.5rem' }}>
           <div style={{ fontSize: '0.875rem', color: 'var(--gray)', marginBottom: '0.5rem' }}>
+            SOL Balance
+          </div>
+          <p style={{ fontSize: '2rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
+            {solBalance.toFixed(4)} SOL
+          </p>
+        </div>
+
+        <div className="card-no-hover" style={{ padding: '1.5rem' }}>
+          <div style={{ fontSize: '0.875rem', color: 'var(--gray)', marginBottom: '0.5rem' }}>
             Portfolio Value
           </div>
           <p style={{ fontSize: '2rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
-            ${totalValue.toFixed(2)}
+            {totalValue.toFixed(4)} SOL
           </p>
         </div>
 
@@ -100,7 +165,7 @@ export default function Portfolio() {
             Total Invested
           </div>
           <p style={{ fontSize: '2rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
-            ${totalInvested.toFixed(2)}
+            {totalInvested.toFixed(4)} SOL
           </p>
         </div>
 
@@ -108,11 +173,11 @@ export default function Portfolio() {
           <div style={{ fontSize: '0.875rem', color: 'var(--gray)', marginBottom: '0.5rem' }}>
             Total Returns
           </div>
-          <p style={{ fontSize: '2rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums', color: 'var(--green)' }}>
-            +{totalReturn.toFixed(1)}%
+          <p style={{ fontSize: '2rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums', color: totalPnL >= 0 ? 'var(--green)' : 'var(--red)' }}>
+            {totalPnL >= 0 ? '+' : ''}{totalReturn.toFixed(1)}%
           </p>
-          <p style={{ fontSize: '0.875rem', color: 'var(--green)' }}>
-            +${totalPnL.toFixed(2)}
+          <p style={{ fontSize: '0.875rem', color: totalPnL >= 0 ? 'var(--green)' : 'var(--red)' }}>
+            {totalPnL >= 0 ? '+' : ''}{totalPnL.toFixed(4)} SOL
           </p>
         </div>
       </div>
@@ -122,7 +187,11 @@ export default function Portfolio() {
           <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Holdings</h2>
         </div>
         
-        {holdings.length === 0 ? (
+        {loading ? (
+          <div style={{ padding: '3rem 2rem', textAlign: 'center' }}>
+            <p style={{ color: 'var(--gray)' }}>Loading holdings...</p>
+          </div>
+        ) : holdings.length === 0 ? (
           <div style={{ padding: '4rem 2rem', textAlign: 'center' }}>
             <Inbox size={48} style={{ margin: '0 auto 1rem', color: 'var(--gray)' }} />
             <h3 style={{ fontSize: '1.125rem', marginBottom: '0.5rem' }}>No Holdings Yet</h3>
@@ -195,14 +264,14 @@ export default function Portfolio() {
                       </Link>
                     </td>
                     <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontSize: '0.9375rem' }}>
-                      {holding.amount}
+                      {holding.amount.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                     </td>
                     <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: 500, fontVariantNumeric: 'tabular-nums', fontSize: '0.9375rem' }}>
-                      ${holding.value.toFixed(2)}
+                      {holding.value.toFixed(6)} SOL
                     </td>
                     <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
                       <div style={{ color: holding.pnl >= 0 ? 'var(--green)' : 'var(--red)', fontWeight: 500, fontVariantNumeric: 'tabular-nums', fontSize: '0.9375rem' }}>
-                        {holding.pnl >= 0 ? '+' : ''}${holding.pnl.toFixed(2)}
+                        {holding.pnl >= 0 ? '+' : ''}{holding.pnl.toFixed(6)} SOL
                       </div>
                       <div style={{ fontSize: '0.8125rem', color: holding.pnl >= 0 ? 'var(--green)' : 'var(--red)' }}>
                         {holding.pnl >= 0 ? '+' : ''}{holding.pnlPercent.toFixed(1)}%
@@ -258,44 +327,48 @@ export default function Portfolio() {
                 </tr>
               </thead>
               <tbody>
-                {transactions.map((tx, i) => (
-                  <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
-                    <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem' }}>
-                      <div>{tx.date}</div>
-                      <div style={{ color: 'var(--gray)', fontSize: '0.8125rem' }}>{tx.time}</div>
-                    </td>
-                    <td style={{ padding: '1rem 1.5rem' }}>
-                      <span style={{
-                        display: 'inline-block',
-                        padding: '0.25rem 0.625rem',
-                        borderRadius: '0.25rem',
-                        fontSize: '0.8125rem',
-                        fontWeight: 500,
-                        border: `1px solid ${tx.type === 'buy' ? 'var(--green)' : 'var(--red)'}`,
-                        color: tx.type === 'buy' ? 'var(--green)' : 'var(--red)'
-                      }}>
-                        {tx.type.toUpperCase()}
-                      </span>
-                    </td>
-                    <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem' }}>{tx.creator}</td>
-                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontSize: '0.875rem' }}>
-                      {tx.amount} tokens
-                    </td>
-                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: 500, fontVariantNumeric: 'tabular-nums', fontSize: '0.875rem' }}>
-                      {tx.sol.toFixed(2)} SOL
-                    </td>
-                    <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>
-                      <a 
-                        href={`https://explorer.solana.com/tx/${tx.signature}?cluster=devnet`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: 'var(--gray)', fontSize: '0.875rem' }}
-                      >
-                        <ExternalLink size={14} />
-                      </a>
-                    </td>
-                  </tr>
-                ))}
+                {transactions.map((tx, i) => {
+                  const txDate = new Date(tx.createdAt);
+                  return (
+                    <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
+                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem' }}>
+                        <div>{txDate.toLocaleDateString()}</div>
+                        <div style={{ color: 'var(--gray)', fontSize: '0.8125rem' }}>{txDate.toLocaleTimeString()}</div>
+                      </td>
+                      <td style={{ padding: '1rem 1.5rem' }}>
+                        <span style={{
+                          display: 'inline-block',
+                          padding: '0.25rem 0.625rem',
+                          borderRadius: '0.25rem',
+                          fontSize: '0.8125rem',
+                          fontWeight: 500,
+                          background: tx.transactionType === 'buy' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                          border: `1px solid ${tx.transactionType === 'buy' ? '#10b981' : '#ef4444'}`,
+                          color: tx.transactionType === 'buy' ? '#10b981' : '#ef4444'
+                        }}>
+                          {tx.transactionType.toUpperCase()}
+                        </span>
+                      </td>
+                      <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem' }}>{tx.creator?.channelName || 'Unknown'}</td>
+                      <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontSize: '0.875rem' }}>
+                        {parseFloat(tx.amount).toLocaleString(undefined, { maximumFractionDigits: 2 })} tokens
+                      </td>
+                      <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: 500, fontVariantNumeric: 'tabular-nums', fontSize: '0.875rem' }}>
+                        {parseFloat(tx.solAmount).toFixed(4)} SOL
+                      </td>
+                      <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>
+                        <a 
+                          href={`https://explorer.solana.com/tx/${tx.signature}?cluster=devnet`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: 'var(--gray)', fontSize: '0.875rem' }}
+                        >
+                          <ExternalLink size={14} />
+                        </a>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
