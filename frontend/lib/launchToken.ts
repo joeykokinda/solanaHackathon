@@ -9,8 +9,12 @@ import {
   getAssociatedTokenAddress
 } from '@solana/spl-token';
 import { WalletContextState } from '@solana/wallet-adapter-react';
+import { 
+  createCreateMetadataAccountV3Instruction,
+  PROGRAM_ID as TOKEN_METADATA_PROGRAM_ID
+} from '@metaplex-foundation/mpl-token-metadata';
 
-import { SOLANA_RPC } from './config';
+import { SOLANA_RPC, API_URL } from './config';
 
 const TOKEN_FACTORY_PROGRAM_ID = new PublicKey('7yNsJvKUNgxdAHgCRY2SWb7GqsaL5HxTgSfpraHQCYdh');
 const BONDING_CURVE_PROGRAM_ID = new PublicKey('ASKaLZvuV9TW6MKxNjQoKAQihzEAaVDzMryFqgvzDswi');
@@ -114,6 +118,48 @@ export async function launchCreatorToken({ wallet, channelData }: LaunchTokenPar
     )
   );
 
+  // Add token metadata so it shows up in wallets
+  const [metadataPDA] = PublicKey.findProgramAddressSync(
+    [
+      Buffer.from('metadata'),
+      TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+      mintPubkey.toBuffer(),
+    ],
+    TOKEN_METADATA_PROGRAM_ID
+  );
+
+  const tokenSymbol = channelData.channelName
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .substring(0, 10)
+    .toUpperCase();
+
+  const metadataInstruction = createCreateMetadataAccountV3Instruction(
+    {
+      metadata: metadataPDA,
+      mint: mintPubkey,
+      mintAuthority: wallet.publicKey,
+      payer: wallet.publicKey,
+      updateAuthority: wallet.publicKey,
+    },
+    {
+      createMetadataAccountArgsV3: {
+        data: {
+          name: channelData.channelName.substring(0, 32),
+          symbol: tokenSymbol,
+          uri: '',
+          sellerFeeBasisPoints: 0,
+          creators: null,
+          collection: null,
+          uses: null,
+        },
+        isMutable: true,
+        collectionDetails: null,
+      },
+    }
+  );
+
+  transaction.add(metadataInstruction);
+
   const initCurveData = Buffer.concat([
     Buffer.from([170, 84, 186, 253, 131, 149, 95, 213])
   ]);
@@ -154,12 +200,17 @@ export async function launchCreatorToken({ wallet, channelData }: LaunchTokenPar
     
     await buyTokens(wallet, mintPubkey.toString(), initialAllocation, maxSol);
     console.log('✅ Creator received', initialAllocation, 'tokens');
-  } catch (e) {
-    console.error('⚠️ Creator buy failed - you can buy tokens manually:', e.message);
+  } catch (e: any) {
+    // Ignore duplicate transaction errors - transaction likely succeeded
+    if (e.message?.includes('already been processed')) {
+      console.log('✅ Transaction already processed - tokens allocated');
+    } else {
+      console.error('⚠️ Creator buy failed - you can buy tokens manually:', e.message);
+    }
     // Don't fail the whole launch if creator buy fails
   }
 
-  await fetch('http://localhost:3001/api/launch/create-token', {
+  await fetch(`${API_URL}/api/launch/create-token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
