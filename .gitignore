@@ -34,6 +34,8 @@ test-ledger/
 !package-lock.json
 !tsconfig.json
 !jsconfig.json
+!railway.json
+!vercel.json
 !Anchor.toml
 *-keypair.json
 *.keypair
