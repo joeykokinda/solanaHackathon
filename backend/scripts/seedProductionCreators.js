@@ -71,9 +71,8 @@ async function seedProduction() {
         continue;
       }
 
-      // Create a placeholder user for this creator
-      const { Keypair } = require('@solana/web3.js');
-      const mockWallet = Keypair.generate().publicKey.toString();
+      // Create a placeholder user for this creator (random UUID)
+      const mockWallet = `mock_${creator.youtubeChannelId}_${Date.now()}`;
 
       // Add to database
       await prisma.creator.create({

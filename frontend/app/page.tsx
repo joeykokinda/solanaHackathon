@@ -47,7 +47,7 @@ export default function LandingPage() {
           <section style={{ 
             maxWidth: '1200px', 
             margin: '0 auto', 
-            padding: '2rem',
+            padding: '5rem 2rem',
             textAlign: 'center',
             minHeight: '100vh',
             display: 'flex',
@@ -56,37 +56,41 @@ export default function LandingPage() {
             alignItems: 'center'
           }}>
             <h1 style={{ 
-              fontSize: '4rem', 
+              fontSize: '3.5rem', 
               fontWeight: 700, 
-              marginBottom: '1.5rem',
-              lineHeight: 1.1
+              marginBottom: '2rem',
+              lineHeight: 1.2
             }}>
-              Invest in Creators<br />Before They Blow Up
+              What if you found MrBeast at 1,000 subscribers?
             </h1>
             
             <p style={{ 
-              fontSize: '1.25rem', 
+              fontSize: '1.5rem', 
               color: 'var(--gray-light)', 
-              marginBottom: '3rem',
-              maxWidth: '600px',
-              margin: '0 auto 3rem'
+              marginBottom: '0.5rem'
             }}>
-              Buy tokens of YouTubers with 1k-50k subs. Profit as they grow.
+              PewDiePie filming in his Swedish bedroom.
+            </p>
+            
+            <p style={{ 
+              fontSize: '1.5rem', 
+              color: 'var(--gray-light)', 
+              marginBottom: '0.5rem'
+            }}>
+              Emma Chamberlain before her first brand deal.
+            </p>
+            
+            <p style={{ 
+              fontSize: '1.5rem', 
+              color: 'var(--gray-light)', 
+              marginBottom: '3rem'
+            }}>
+              The next viral creator is uploading right now.
             </p>
 
-            <div style={{ 
-              display: 'flex', 
-              gap: '1rem', 
-              justifyContent: 'center',
-              flexWrap: 'wrap'
-            }}>
-              <a href="/app" className="btn-primary">
-                Explore Creators
-              </a>
-              <a href="/app" className="btn">
-                Launch App
-              </a>
-            </div>
+            <a href="/app" className="btn-primary" style={{ fontSize: '1.125rem', padding: '1rem 2rem' }}>
+              Discover Creators →
+            </a>
           </section>
 
           <section id="how-it-works" style={{ 
