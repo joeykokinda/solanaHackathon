@@ -38,7 +38,7 @@ export default function PublicNav() {
       `}</style>
       <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pointer-events-none">
         <motion.nav
-          className="w-full bg-black/90 backdrop-blur-md border border-gray-600 pointer-events-auto"
+          className="w-full bg-black/20 backdrop-blur-md border border-white/10 pointer-events-auto"
           initial={false}
           animate={{
             width: scrolled ? '900px' : '100%',
