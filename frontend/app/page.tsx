@@ -4,8 +4,11 @@ import { API_URL } from '@/lib/config';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import PublicNav from '@/components/PublicNav';
-import Aurora from '@/components/ui/Aurora';
+import Silk from '@/components/Silk';
 import CreatorCard from '@/components/CreatorCard';
+import SpotlightCard from '@/components/SpotlightCard';
+import ScrollFloat from '@/components/ScrollFloat';
+import ShinyText from '@/components/ShinyText';
 export default function LandingPage() {
   const { connected } = useWallet();
   const router = useRouter();
@@ -50,13 +53,16 @@ export default function LandingPage() {
   return (
     <>
       <PublicNav />
-      <div style={{ position: 'relative', minHeight: '100vh', backgroundColor: '#000000' }}>
-        <Aurora 
-          colorStops={['#0a0a0a', '#1a1a1a', '#0f0f0f', '#1a1a1a', '#0a0a0a']}
-          amplitude={1.0}
-          blend={0.5}
-          speed={0.3}
-        />
+      <div style={{ position: 'relative', minHeight: '100vh', backgroundColor: '#000000', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0 }}>
+          <Silk
+            speed={5}
+            scale={1}
+            color="#3a2a5a"
+            noiseIntensity={1.5}
+            rotation={0}
+          />
+        </div>
         <div style={{ position: 'relative', zIndex: 1 }}>
           <section style={{ 
             maxWidth: '1200px', 
@@ -73,7 +79,8 @@ export default function LandingPage() {
               fontSize: '4rem', 
               fontWeight: 700, 
               marginBottom: '1.5rem',
-              lineHeight: 1.1
+              lineHeight: 1.1,
+              color: 'white'
             }}>
               Invest in Creators<br />
               <span style={{
@@ -85,7 +92,7 @@ export default function LandingPage() {
             </h1>
             <p style={{ 
               fontSize: '1.25rem', 
-              color: 'var(--gray-light)', 
+              color: 'rgba(255, 255, 255, 0.7)', 
               marginBottom: '3rem',
               maxWidth: '600px',
               margin: '0 auto 3rem'
@@ -102,7 +109,7 @@ export default function LandingPage() {
                 Explore Creators
               </a>
               <a href="/app" className="btn">
-                Launch App
+                <ShinyText text="Launch App" speed={3} />
               </a>
             </div>
           </section>
@@ -122,38 +129,40 @@ export default function LandingPage() {
                 fontWeight: 700, 
                 marginBottom: '2rem',
                 lineHeight: 1.3,
-                opacity: 0.95
-              }}>
+                color: 'white',
+                opacity: 0,
+                transform: 'translateY(30px)'
+              }} className="reveal-line" data-delay="0">
                 What if you found MrBeast at 1,000 subscribers?
               </h2>
               <p style={{ 
                 fontSize: '1.75rem', 
-                color: 'var(--gray-light)', 
-                marginBottom: '1rem',
-                lineHeight: 1.5,
-                opacity: 0,
-                transform: 'translateY(30px)'
-              }} className="reveal-line" data-delay="0">
-                PewDiePie filming in his Swedish bedroom.
-              </p>
-              <p style={{ 
-                fontSize: '1.75rem', 
-                color: 'var(--gray-light)', 
+                color: 'rgba(255, 255, 255, 0.7)', 
                 marginBottom: '1rem',
                 lineHeight: 1.5,
                 opacity: 0,
                 transform: 'translateY(30px)'
               }} className="reveal-line" data-delay="1">
-                Emma Chamberlain before her first brand deal.
+                PewDiePie filming in his Swedish bedroom.
               </p>
               <p style={{ 
                 fontSize: '1.75rem', 
-                color: 'var(--gray-light)', 
-                marginBottom: '3rem',
+                color: 'rgba(255, 255, 255, 0.7)', 
+                marginBottom: '1rem',
                 lineHeight: 1.5,
                 opacity: 0,
                 transform: 'translateY(30px)'
               }} className="reveal-line" data-delay="2">
+                Emma Chamberlain before her first brand deal.
+              </p>
+              <p style={{ 
+                fontSize: '1.75rem', 
+                color: 'rgba(255, 255, 255, 0.7)', 
+                marginBottom: '3rem',
+                lineHeight: 1.5,
+                opacity: 0,
+                transform: 'translateY(30px)'
+              }} className="reveal-line" data-delay="3">
                 The next viral creator is uploading right now.
               </p>
             </div>
@@ -164,7 +173,7 @@ export default function LandingPage() {
             padding: '8rem 2rem',
             textAlign: 'center'
           }}>
-            <h2 style={{ fontSize: '2.5rem', marginBottom: '4rem' }}>
+            <h2 style={{ fontSize: '2.5rem', marginBottom: '4rem', color: 'white' }}>
               How It Works
             </h2>
             <div style={{ 
@@ -172,33 +181,34 @@ export default function LandingPage() {
               gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
               gap: '2rem'
             }}>
-              <div className="card-no-hover" style={{ padding: '2rem' }}>
-                <h3 style={{ marginBottom: '0.75rem' }}>Discover</h3>
-                <p style={{ color: 'var(--gray)', lineHeight: 1.6 }}>
+              <SpotlightCard spotlightColor="rgba(153, 69, 255, 0.2)">
+                <h3 style={{ marginBottom: '0.75rem', color: 'white', fontSize: '1.5rem', fontWeight: 600 }}>Discover</h3>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: 1.6 }}>
                   Find early-stage YouTubers with 1k-50k subscribers using YouTube API data
                 </p>
-              </div>
-              <div className="card-no-hover" style={{ padding: '2rem' }}>
-                <h3 style={{ marginBottom: '0.75rem' }}>Invest</h3>
-                <p style={{ color: 'var(--gray)', lineHeight: 1.6 }}>
+              </SpotlightCard>
+              <SpotlightCard spotlightColor="rgba(153, 69, 255, 0.2)">
+                <h3 style={{ marginBottom: '0.75rem', color: 'white', fontSize: '1.5rem', fontWeight: 600 }}>Invest</h3>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: 1.6 }}>
                   Buy creator tokens on Solana. Price increases as more people buy (bonding curve)
                 </p>
-              </div>
-              <div className="card-no-hover" style={{ padding: '2rem' }}>
-                <h3 style={{ marginBottom: '0.75rem' }}>Track</h3>
-                <p style={{ color: 'var(--gray)', lineHeight: 1.6 }}>
+              </SpotlightCard>
+              <SpotlightCard spotlightColor="rgba(153, 69, 255, 0.2)">
+                <h3 style={{ marginBottom: '0.75rem', color: 'white', fontSize: '1.5rem', fontWeight: 600 }}>Track</h3>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: 1.6 }}>
                   Watch token value grow as creators gain subs. Sell anytime for profit (or loss)
                 </p>
-              </div>
+              </SpotlightCard>
             </div>
           </section>
           {featuredCreators.length > 0 && (
             <section id="featured" style={{ 
               maxWidth: '1200px',
               margin: '0 auto',
-              padding: '8rem 2rem'
+              padding: '8rem 2rem',
+              textAlign: 'center'
             }}>
-              <h2 style={{ fontSize: '2rem', marginBottom: '3rem', textAlign: 'center' }}>
+              <h2 style={{ fontSize: '2rem', marginBottom: '3rem', color: 'white' }}>
                 Featured Creators
               </h2>
               <div style={{
@@ -224,7 +234,7 @@ export default function LandingPage() {
             padding: '8rem 2rem',
             textAlign: 'center'
           }}>
-            <h2 style={{ fontSize: '2.5rem', marginBottom: '4rem' }}>
+            <h2 style={{ fontSize: '2.5rem', marginBottom: '4rem', color: 'white' }}>
               Why YouVest?
             </h2>
             <div style={{
@@ -233,42 +243,42 @@ export default function LandingPage() {
               gap: '2rem',
               textAlign: 'left'
             }}>
-              <div className="card-no-hover" style={{ padding: '2rem' }}>
+              <SpotlightCard spotlightColor="rgba(153, 69, 255, 0.2)">
                 <div style={{ marginBottom: '1rem' }}>
                   <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
                     <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="2" />
                     <path d="M20 10 L20 20 L28 16 Z" fill="white" />
                   </svg>
                 </div>
-                <h3 style={{ marginBottom: '0.75rem', fontSize: '1.25rem' }}>Spot Talent Early</h3>
-                <p style={{ color: 'var(--gray-light)', lineHeight: 1.6 }}>
+                <h3 style={{ marginBottom: '0.75rem', fontSize: '1.25rem', color: 'white', fontWeight: 600 }}>Spot Talent Early</h3>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: 1.6 }}>
                   Get in before they blow up. Tokens are cheapest when creators have &lt;5k subs.
                 </p>
-              </div>
-              <div className="card-no-hover" style={{ padding: '2rem' }}>
+              </SpotlightCard>
+              <SpotlightCard spotlightColor="rgba(153, 69, 255, 0.2)">
                 <div style={{ marginBottom: '1rem' }}>
                   <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
                     <rect x="8" y="12" width="24" height="16" stroke="white" strokeWidth="2" rx="2" />
                     <path d="M12 20 L20 24 L28 20" stroke="white" strokeWidth="2" strokeLinecap="round" />
                   </svg>
                 </div>
-                <h3 style={{ marginBottom: '0.75rem', fontSize: '1.25rem' }}>Fair Pricing</h3>
-                <p style={{ color: 'var(--gray-light)', lineHeight: 1.6 }}>
+                <h3 style={{ marginBottom: '0.75rem', fontSize: '1.25rem', color: 'white', fontWeight: 600 }}>Fair Pricing</h3>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: 1.6 }}>
                   Bonding curve = no BS. Price goes up with demand, down with sells. Pure math.
                 </p>
-              </div>
-              <div className="card-no-hover" style={{ padding: '2rem' }}>
+              </SpotlightCard>
+              <SpotlightCard spotlightColor="rgba(153, 69, 255, 0.2)">
                 <div style={{ marginBottom: '1rem' }}>
                   <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
                     <polygon points="20,8 32,15 32,25 20,32 8,25 8,15" stroke="white" strokeWidth="2" fill="none" />
                     <circle cx="20" cy="20" r="4" fill="white" />
                   </svg>
                 </div>
-                <h3 style={{ marginBottom: '0.75rem', fontSize: '1.25rem' }}>Built on Solana</h3>
-                <p style={{ color: 'var(--gray-light)', lineHeight: 1.6 }}>
+                <h3 style={{ marginBottom: '0.75rem', fontSize: '1.25rem', color: 'white', fontWeight: 600 }}>Built on Solana</h3>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: 1.6 }}>
                   Fast transactions, low fees (~$0.00025). Your tokens, your wallet, your control.
                 </p>
-              </div>
+              </SpotlightCard>
             </div>
           </section>
           <section id="for-creators" style={{ 
@@ -277,15 +287,15 @@ export default function LandingPage() {
             padding: '8rem 2rem',
             textAlign: 'center'
           }}>
-            <h2 style={{ fontSize: '2.5rem', marginBottom: '1.5rem' }}>
+            <h2 style={{ fontSize: '2.5rem', marginBottom: '1.5rem', color: 'white' }}>
               Are You a Creator?
             </h2>
             <p style={{ 
               fontSize: '1.25rem', 
-              color: 'var(--gray-light)', 
+              color: 'rgba(255, 255, 255, 0.7)', 
               marginBottom: '4rem',
               maxWidth: '700px',
-              margin: '0 auto 4rem'
+              margin: '2rem auto 4rem'
             }}>
               Launch your own token in minutes. Connect your YouTube channel and let your fans invest in your growth.
             </p>
@@ -295,42 +305,42 @@ export default function LandingPage() {
               gap: '2rem',
               marginBottom: '3rem'
             }}>
-              <div className="card-no-hover" style={{ padding: '2rem', textAlign: 'center' }}>
+              <SpotlightCard spotlightColor="rgba(153, 69, 255, 0.2)">
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
                   <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
                     <rect x="8" y="10" width="24" height="20" rx="2" stroke="white" strokeWidth="2" />
                     <polygon points="16,18 24,22 16,26" fill="white" />
                   </svg>
                 </div>
-                <h3 style={{ marginBottom: '0.75rem', fontSize: '1.125rem' }}>Connect YouTube</h3>
-                <p style={{ color: 'var(--gray)', lineHeight: 1.6, fontSize: '0.95rem' }}>
+                <h3 style={{ marginBottom: '0.75rem', fontSize: '1.125rem', color: 'white', fontWeight: 600 }}>Connect YouTube</h3>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: 1.6, fontSize: '0.95rem' }}>
                   Verify ownership of your channel with one click
                 </p>
-              </div>
-              <div className="card-no-hover" style={{ padding: '2rem', textAlign: 'center' }}>
+              </SpotlightCard>
+              <SpotlightCard spotlightColor="rgba(153, 69, 255, 0.2)">
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
                   <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
                     <circle cx="20" cy="20" r="14" stroke="white" strokeWidth="2" />
                     <circle cx="20" cy="20" r="8" fill="white" />
                   </svg>
                 </div>
-                <h3 style={{ marginBottom: '0.75rem', fontSize: '1.125rem' }}>Launch Token</h3>
-                <p style={{ color: 'var(--gray)', lineHeight: 1.6, fontSize: '0.95rem' }}>
+                <h3 style={{ marginBottom: '0.75rem', fontSize: '1.125rem', color: 'white', fontWeight: 600 }}>Launch Token</h3>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: 1.6, fontSize: '0.95rem' }}>
                   Create a real token on Solana with a bonding curve
                 </p>
-              </div>
-              <div className="card-no-hover" style={{ padding: '2rem', textAlign: 'center' }}>
+              </SpotlightCard>
+              <SpotlightCard spotlightColor="rgba(153, 69, 255, 0.2)">
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
                   <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
                     <path d="M20 8 L30 15 L30 25 L20 32 L10 25 L10 15 Z" stroke="white" strokeWidth="2" fill="none" />
                     <path d="M20 16 L20 24 M16 20 L24 20" stroke="white" strokeWidth="2" strokeLinecap="round" />
                   </svg>
                 </div>
-                <h3 style={{ marginBottom: '0.75rem', fontSize: '1.125rem' }}>Grow Together</h3>
-                <p style={{ color: 'var(--gray)', lineHeight: 1.6, fontSize: '0.95rem' }}>
+                <h3 style={{ marginBottom: '0.75rem', fontSize: '1.125rem', color: 'white', fontWeight: 600 }}>Grow Together</h3>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: 1.6, fontSize: '0.95rem' }}>
                   Your fans profit when you grow. Built-in liquidity
                 </p>
-              </div>
+              </SpotlightCard>
             </div>
             <a href="/app/launch" className="btn-primary" style={{ fontSize: '1.125rem', padding: '1rem 2rem' }}>
               Launch Your Token →
@@ -339,48 +349,49 @@ export default function LandingPage() {
           <section id="faq" style={{ 
             maxWidth: '800px', 
             margin: '0 auto',
-            padding: '8rem 2rem'
+            padding: '8rem 2rem',
+            textAlign: 'center'
           }}>
-            <h2 style={{ fontSize: '2.5rem', marginBottom: '4rem', textAlign: 'center' }}>
+            <h2 style={{ fontSize: '2.5rem', marginBottom: '4rem', color: 'white' }}>
               FAQ
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <div className="card-no-hover" style={{ padding: '2rem', textAlign: 'left' }}>
-                <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>How does the bonding curve work?</h3>
-                <p style={{ color: 'var(--gray-light)', lineHeight: 1.6 }}>
+              <SpotlightCard spotlightColor="rgba(153, 69, 255, 0.2)">
+                <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem', color: 'white', fontWeight: 600, textAlign: 'left' }}>How does the bonding curve work?</h3>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: 1.6, textAlign: 'left' }}>
                   More buyers = higher price. More sellers = lower price. It's automatic - no market manipulation possible.
                 </p>
-              </div>
-              <div className="card-no-hover" style={{ padding: '2rem', textAlign: 'left' }}>
-                <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>Can I actually sell my tokens?</h3>
-                <p style={{ color: 'var(--gray-light)', lineHeight: 1.6 }}>
+              </SpotlightCard>
+              <SpotlightCard spotlightColor="rgba(153, 69, 255, 0.2)">
+                <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem', color: 'white', fontWeight: 600, textAlign: 'left' }}>Can I actually sell my tokens?</h3>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: 1.6, textAlign: 'left' }}>
                   Yes. Sell back to the bonding curve anytime. Liquidity is built-in.
                 </p>
-              </div>
-              <div className="card-no-hover" style={{ padding: '2rem', textAlign: 'left' }}>
-                <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>What if the creator stops posting?</h3>
-                <p style={{ color: 'var(--gray-light)', lineHeight: 1.6 }}>
+              </SpotlightCard>
+              <SpotlightCard spotlightColor="rgba(153, 69, 255, 0.2)">
+                <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem', color: 'white', fontWeight: 600, textAlign: 'left' }}>What if the creator stops posting?</h3>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: 1.6, textAlign: 'left' }}>
                   Then your token probably drops in value. This is risky - only invest what you can lose.
                 </p>
-              </div>
-              <div className="card-no-hover" style={{ padding: '2rem', textAlign: 'left' }}>
-                <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>Do creators know about this?</h3>
-                <p style={{ color: 'var(--gray-light)', lineHeight: 1.6 }}>
+              </SpotlightCard>
+              <SpotlightCard spotlightColor="rgba(153, 69, 255, 0.2)">
+                <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem', color: 'white', fontWeight: 600, textAlign: 'left' }}>Do creators know about this?</h3>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: 1.6, textAlign: 'left' }}>
                   Not yet. We're pulling public YouTube data. Creators can claim their profile later for rewards.
                 </p>
-              </div>
-              <div className="card-no-hover" style={{ padding: '2rem', textAlign: 'left' }}>
-                <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>Is this legal?</h3>
-                <p style={{ color: 'var(--gray-light)', lineHeight: 1.6 }}>
+              </SpotlightCard>
+              <SpotlightCard spotlightColor="rgba(153, 69, 255, 0.2)">
+                <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem', color: 'white', fontWeight: 600, textAlign: 'left' }}>Is this legal?</h3>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: 1.6, textAlign: 'left' }}>
                   We're not financial advisors. This is experimental DeFi. DYOR (do your own research).
                 </p>
-              </div>
-              <div className="card-no-hover" style={{ padding: '2rem', textAlign: 'left' }}>
-                <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>What's the catch?</h3>
-                <p style={{ color: 'var(--gray-light)', lineHeight: 1.6 }}>
+              </SpotlightCard>
+              <SpotlightCard spotlightColor="rgba(153, 69, 255, 0.2)">
+                <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem', color: 'white', fontWeight: 600, textAlign: 'left' }}>What's the catch?</h3>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: 1.6, textAlign: 'left' }}>
                   It's a hackathon project. Bugs exist. Only on devnet for now. Use at your own risk.
                 </p>
-              </div>
+              </SpotlightCard>
             </div>
           </section>
           <section style={{ 
@@ -389,12 +400,12 @@ export default function LandingPage() {
             padding: '8rem 2rem',
             textAlign: 'center'
           }}>
-            <h2 style={{ fontSize: '2.5rem', marginBottom: '1.5rem' }}>
+            <h2 style={{ fontSize: '2.5rem', marginBottom: '1.5rem', color: 'white' }}>
               Ready to Find the Next MrBeast?
             </h2>
             <p style={{ 
               fontSize: '1.125rem', 
-              color: 'var(--gray-light)',
+              color: 'rgba(255, 255, 255, 0.7)',
               marginBottom: '2rem',
               maxWidth: '600px',
               margin: '0 auto 2rem'
