@@ -1,7 +1,6 @@
 # YouVest - Invest in Creators BEFORE They Blow Up
 
-**Live Demo:** [https://www.youvest.lol/](https://www.youvest.lol/)  
-**Alt URL:** [https://solana-hackathon-murex.vercel.app/](https://solana-hackathon-murex.vercel.app/)
+**Live Demo:** [https://www.youvest.lol/](https://www.youvest.lol/)  USE SOLANA DEVNET and AIRDROP YOURSELF SOL :)
 
 **Hackathon:** Cypherpunk Hackathon 2025 by Colosseum  
 
