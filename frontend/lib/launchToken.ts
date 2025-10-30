@@ -180,20 +180,36 @@ export async function launchCreatorToken({ wallet, channelData }: LaunchTokenPar
       console.error('️ Creator buy failed - you can buy tokens manually:', e.message);
     }
   }
-  await fetch(`${API_URL}/api/launch/create-token`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      wallet: wallet.publicKey.toString(),
-      youtubeChannelId: channelData.youtubeChannelId,
-      channelName: channelData.channelName,
-      channelAvatar: channelData.channelAvatar,
-      subscribers: channelData.subscribers,
-      avgViews: channelData.avgViews,
-      videoCount: channelData.videoCount,
-      tokenMint: mintPubkey.toString()
-    })
-  });
+  console.log('💾 Saving token to database...');
+  try {
+    const dbResponse = await fetch(`${API_URL}/api/launch/create-token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        wallet: wallet.publicKey.toString(),
+        youtubeChannelId: channelData.youtubeChannelId,
+        channelName: channelData.channelName,
+        channelAvatar: channelData.channelAvatar,
+        subscribers: channelData.subscribers,
+        avgViews: channelData.avgViews,
+        videoCount: channelData.videoCount,
+        tokenMint: mintPubkey.toString()
+      })
+    });
+
+    if (!dbResponse.ok) {
+      const errorText = await dbResponse.text();
+      console.error('❌ Database save failed:', errorText);
+      throw new Error(`Failed to save token to database: ${errorText}`);
+    }
+
+    const dbResult = await dbResponse.json();
+    console.log('✅ Token saved to database:', dbResult);
+  } catch (dbError: any) {
+    console.error('❌ Database error:', dbError.message);
+    throw new Error(`Token created on-chain but failed to save to database: ${dbError.message}. Token mint: ${mintPubkey.toString()}`);
+  }
+
   return {
     tokenMint: mintPubkey.toString(),
     signature
