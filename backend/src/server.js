@@ -13,6 +13,8 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const allowedOrigins = [
   'http://localhost:3000',
+  'https://www.youvest.lol',
+  'https://youvest.lol',
   'https://solana-hackathon-murex.vercel.app',
   process.env.FRONTEND_URL
 ].filter(Boolean);
